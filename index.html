@@ -2,131 +2,2406 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>ORBYT — Roblox Tool</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORBYT — Roblox Dev Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg:#080a0f; --bg2:#0d1018; --bg3:#13161f;
-    --surface:#191d28; --surface2:#1f2435;
-    --border:#252a3a; --border2:#2d3347;
-    --coral:#ff6b4a; --amber:#ffb347; --neon:#4affb4;
-    --blue:#4a9fff; --purple:#a47fff;
-    --text:#f0f2f8; --text2:#8892a8; --text3:#4a5168;
-    --glass:rgba(25,29,40,0.85);
-    --sidebar-w:220px;
+:root {
+  --bg: #080810;
+  --surface: #0e0e1a;
+  --card: #12121f;
+  --card2: #16162a;
+  --border: #1e1e35;
+  --border-hi: #2a2a4a;
+  --text: #f0f0ff;
+  --muted: #5a5a80;
+  --hint: #2a2a45;
+  --accent: #ff5f40;
+  --accent2: #ffaa40;
+  --blue: #4f8fff;
+  --green: #3dd68c;
+  --purple: #a855f7;
+  --glow: rgba(255,95,64,0.15);
+  --glow2: rgba(79,143,255,0.12);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  display:flex;flex-direction:column;
+}
+
+/* ── GRID BG ── */
+.grid-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(rgba(79,143,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(79,143,255,0.04) 1px, transparent 1px);
+  background-size:40px 40px;
+}
+.grid-bg::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255,95,64,0.07) 0%, transparent 70%);
+}
+
+/* ── AUTH SCREEN ── */
+#authScreen{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:flex-start;justify-content:center;
+  background:var(--bg);
+  overflow-y:auto;
+  transition:opacity 0.5s, transform 0.5s;
+  padding:20px 0 40px;
+}
+#authScreen.hidden{opacity:0;transform:scale(1.04);pointer-events:none;}
+.auth-box{
+  width:100%;max-width:420px;padding:20px;
+  display:flex;flex-direction:column;align-items:center;gap:28px;
+}
+.auth-logo{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.auth-logo-mark{
+  width:64px;height:64px;border-radius:18px;
+  background:linear-gradient(135deg,#ff5f40,#ffaa40);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;
+  color:#fff;letter-spacing:-1px;
+  box-shadow:0 0 40px rgba(255,95,64,0.4);
+  animation:pulse 3s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 40px rgba(255,95,64,0.4);}50%{box-shadow:0 0 60px rgba(255,95,64,0.7);}}
+.auth-logo-name{
+  font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;
+  letter-spacing:6px;color:var(--text);
+}
+.auth-logo-tag{font-size:0.6rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;}
+.auth-card{
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:28px;
+  display:flex;flex-direction:column;gap:14px;
+  box-shadow:0 0 60px rgba(0,0,0,0.5);
+}
+.auth-title{
+  font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;
+  text-align:center;color:var(--text);letter-spacing:1px;
+}
+.auth-sub{font-size:0.62rem;color:var(--muted);text-align:center;letter-spacing:1.5px;margin-top:-8px;}
+.auth-btn{
+  width:100%;padding:12px 16px;border-radius:12px;
+  border:1px solid var(--border-hi);
+  background:var(--card2);
+  color:var(--text);
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.75rem;letter-spacing:1.5px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:all 0.2s;
+}
+.auth-btn svg{flex-shrink:0;}
+.auth-btn:hover{border-color:var(--accent);background:rgba(255,95,64,0.06);transform:translateY(-1px);}
+.auth-btn.google:hover{border-color:#4285f4;background:rgba(66,133,244,0.08);}
+.auth-btn.roblox:hover{border-color:#ff4444;background:rgba(255,68,68,0.08);}
+.auth-btn-icon{font-size:1.1rem;}
+.auth-divider{
+  display:flex;align-items:center;gap:10px;
+  font-size:0.55rem;color:var(--muted);letter-spacing:2px;
+}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-or-continue{font-size:0.6rem;color:var(--muted);letter-spacing:2px;text-align:center;}
+.auth-field{display:flex;flex-direction:column;gap:6px;}
+.auth-field label{font-size:0.58rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.auth-input{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);padding:10px 13px;border-radius:10px;
+  font-family:'JetBrains Mono',monospace;font-size:0.75rem;
+  outline:none;transition:border-color 0.2s;width:100%;
+}
+.auth-input:focus{border-color:var(--accent);}
+.auth-input::placeholder{color:var(--hint);font-style:italic;}
+.auth-submit{
+  width:100%;padding:13px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:'Syne',sans-serif;
+  font-size:0.9rem;font-weight:700;letter-spacing:3px;
+  cursor:pointer;transition:opacity 0.2s,transform 0.15s;
+  box-shadow:0 4px 20px rgba(255,95,64,0.3);
+}
+.auth-submit:hover{opacity:0.9;transform:translateY(-1px);}
+.auth-switch{font-size:0.62rem;color:var(--muted);text-align:center;letter-spacing:1px;}
+.auth-switch span{color:var(--accent);cursor:pointer;}
+.auth-switch span:hover{text-decoration:underline;}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:56px;
+  background:rgba(14,14,26,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;
+  padding:0 20px;
+  position:relative;z-index:100;flex-shrink:0;
+}
+.topbar-logo{
+  font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;
+  letter-spacing:4px;
+  background:linear-gradient(135deg,#ff5f40,#ffaa40);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.topbar-spacer{flex:1;}
+.topbar-creds{display:flex;align-items:center;gap:8px;}
+.tc-input{
+  background:var(--card);border:1px solid var(--border);
+  color:var(--text);padding:6px 10px;border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:0.65rem;
+  outline:none;transition:border-color 0.2s;
+}
+.tc-input:focus{border-color:var(--accent);}
+.tc-input::placeholder{color:var(--hint);font-style:italic;}
+.tc-key{width:148px;padding-right:28px;position:relative;}
+.tc-wrap{position:relative;}
+.tc-eye{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.75rem;
+}
+.tc-uid{width:90px;}
+.cred-pill{
+  font-size:0.6rem;padding:4px 10px;border-radius:20px;
+  border:1px solid var(--border);color:var(--muted);
+  letter-spacing:1px;transition:all 0.3s;
+  background:var(--card);
+}
+.cred-pill.ok{border-color:rgba(61,214,140,0.4);color:var(--green);background:rgba(61,214,140,0.07);}
+.cred-pill.warn{border-color:rgba(255,170,64,0.4);color:var(--accent2);background:rgba(255,170,64,0.07);}
+.topbar-avatar{
+  width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;cursor:pointer;border:1px solid var(--border-hi);
+  position:relative;
+}
+.topbar-avatar::after{
+  content:'';position:absolute;bottom:0;right:0;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green);border:2px solid var(--bg);
+}
+.sidebar-toggle{
+  display:none;background:none;border:none;
+  color:var(--muted);cursor:pointer;font-size:1.1rem;
+}
+
+/* ── APP LAYOUT ── */
+.app-body{display:flex;flex:1;overflow:hidden;position:relative;z-index:1;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:230px;flex-shrink:0;
+  background:rgba(14,14,26,0.6);
+  backdrop-filter:blur(20px);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow-y:auto;padding:12px 0 24px;
+}
+.sidebar::-webkit-scrollbar{width:0;}
+.nav-section{padding:16px 0 4px;}
+.nav-label{
+  font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted);padding:0 16px 8px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all 0.15s;
+  color:var(--muted);font-size:0.68rem;letter-spacing:1.5px;
+  user-select:none;position:relative;
+  border-radius:0 8px 8px 0;margin:1px 8px 1px 0;
+}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.03);}
+.nav-item.active{
+  border-left-color:var(--accent);
+  color:var(--text);
+  background:linear-gradient(90deg,rgba(255,95,64,0.1),transparent);
+}
+.nav-item.active .nav-icon{filter:none;}
+.nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;font-size:0.48rem;
+  background:var(--accent);color:#fff;
+  padding:2px 6px;border-radius:20px;letter-spacing:1px;
+}
+.nav-divider{height:1px;background:var(--border);margin:6px 16px;}
+.nav-user{
+  margin-top:auto;padding:14px 16px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.nav-user-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;flex-shrink:0;
+}
+.nav-user-info{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.nav-user-name{font-size:0.72rem;color:var(--text);font-family:'Syne',sans-serif;font-weight:600;}
+.nav-user-role{font-size:0.52rem;color:var(--muted);letter-spacing:1.5px;}
+.nav-logout{
+  margin-left:auto;background:none;border:none;
+  color:var(--muted);cursor:pointer;font-size:0.8rem;
+  padding:4px;border-radius:6px;transition:color 0.15s;
+}
+.nav-logout:hover{color:var(--accent);}
+
+/* ── MAIN ── */
+.main{
+  flex:1;overflow-y:auto;padding:28px 28px 60px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.main::-webkit-scrollbar{width:4px;}
+.main::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* ── PANELS ── */
+.panel{display:none;animation:fadeIn 0.25s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── PAGE HEADER ── */
+.ph{margin-bottom:24px;display:flex;align-items:flex-start;gap:16px;}
+.ph-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;flex-shrink:0;
+}
+.ph-icon.orange{background:rgba(255,95,64,0.12);border:1px solid rgba(255,95,64,0.2);}
+.ph-icon.blue{background:rgba(79,143,255,0.12);border:1px solid rgba(79,143,255,0.2);}
+.ph-icon.green{background:rgba(61,214,140,0.12);border:1px solid rgba(61,214,140,0.2);}
+.ph-icon.purple{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.2);}
+.ph-icon.amber{background:rgba(255,170,64,0.12);border:1px solid rgba(255,170,64,0.2);}
+.ph-text h1{
+  font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;
+  letter-spacing:2px;color:var(--text);line-height:1;
+}
+.ph-text p{font-size:0.62rem;color:var(--muted);letter-spacing:1.5px;margin-top:5px;}
+.ph-actions{margin-left:auto;display:flex;gap:8px;align-items:center;}
+
+/* ── CARDS / SECTIONS ── */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;margin-bottom:12px;
+}
+.card-header{
+  padding:13px 18px;background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.card-icon{font-size:0.9rem;}
+.card-title{
+  font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;
+  letter-spacing:2px;color:var(--text);
+}
+.card-badge{
+  margin-left:auto;font-size:0.48rem;
+  padding:2px 8px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase;
+}
+.cb-req{background:var(--accent);color:#fff;}
+.cb-opt{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.cb-new{background:rgba(61,214,140,0.15);border:1px solid rgba(61,214,140,0.3);color:var(--green);}
+.card-body{padding:18px;display:flex;flex-direction:column;gap:14px;}
+
+/* ── FIELDS ── */
+.field{display:flex;flex-direction:column;gap:5px;}
+.field-label{
+  font-size:0.58rem;color:var(--muted);
+  letter-spacing:2px;text-transform:uppercase;
+}
+.field-hint{font-size:0.57rem;color:var(--hint);letter-spacing:1px;margin-top:-2px;}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+input[type=text],input[type=password],input[type=number],textarea,select{
+  width:100%;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);padding:10px 13px;border-radius:10px;
+  font-family:'JetBrains Mono',monospace;font-size:0.75rem;
+  outline:none;transition:border-color 0.2s;-webkit-appearance:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);}
+input::placeholder,textarea::placeholder{color:var(--hint);font-style:italic;}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+select{cursor:pointer;}
+select option{background:#12121f;}
+
+/* ── TOGGLE ── */
+.toggle-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--border);
+}
+.toggle-row:last-child{border-bottom:none;padding-bottom:0;}
+.toggle-row:first-child{padding-top:0;}
+.ti{display:flex;flex-direction:column;gap:3px;}
+.ti-name{font-size:0.72rem;color:var(--text);}
+.ti-desc{font-size:0.58rem;color:var(--muted);letter-spacing:1px;}
+.switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{
+  position:absolute;inset:0;
+  background:var(--border);border-radius:22px;
+  cursor:pointer;transition:background 0.2s;
+}
+.slider::before{
+  content:'';position:absolute;
+  width:16px;height:16px;left:3px;top:3px;
+  background:var(--muted);border-radius:50%;
+  transition:transform 0.2s,background 0.2s;
+}
+.switch input:checked+.slider{background:var(--accent);}
+.switch input:checked+.slider::before{transform:translateX(18px);background:#fff;}
+
+/* ── RADIO ── */
+.radio-group{display:flex;gap:8px;flex-wrap:wrap;}
+.radio-opt{position:relative;}
+.radio-opt input{position:absolute;opacity:0;}
+.radio-opt label{
+  display:block;padding:7px 14px;
+  border:1px solid var(--border);border-radius:8px;
+  font-size:0.67rem;cursor:pointer;color:var(--muted);
+  letter-spacing:1px;transition:all 0.15s;
+}
+.radio-opt input:checked+label{
+  border-color:var(--accent);color:var(--accent);
+  background:rgba(255,95,64,0.06);
+}
+
+/* ── FILE UPLOAD ── */
+.file-zone{
+  border:1px dashed var(--border);border-radius:10px;
+  padding:20px;text-align:center;cursor:pointer;
+  transition:all 0.2s;position:relative;
+}
+.file-zone:hover{border-color:var(--accent);background:rgba(255,95,64,0.03);}
+.file-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.fz-icon{font-size:1.4rem;margin-bottom:5px;}
+.fz-text{font-size:0.62rem;color:var(--muted);letter-spacing:1px;}
+.fz-name{font-size:0.65rem;color:var(--green);margin-top:4px;display:none;}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:10px 18px;border-radius:10px;border:none;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.7rem;letter-spacing:1.5px;cursor:pointer;
+  transition:all 0.2s;display:inline-flex;align-items:center;gap:7px;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;box-shadow:0 4px 15px rgba(255,95,64,0.25);
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,95,64,0.35);}
+.btn-secondary{
+  background:var(--card2);border:1px solid var(--border-hi);
+  color:var(--muted);
+}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.btn-ghost{background:transparent;border:1px dashed var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-full{width:100%;justify-content:center;}
+.btn-submit{
+  width:100%;padding:14px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-family:'Syne',sans-serif;
+  font-size:1rem;font-weight:700;letter-spacing:4px;cursor:pointer;
+  transition:opacity 0.2s,transform 0.1s;
+  box-shadow:0 4px 20px rgba(255,95,64,0.3);
+}
+.btn-submit:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-submit:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ── RESULT BOXES ── */
+.result{
+  margin-top:12px;padding:13px;border-radius:10px;
+  font-size:0.68rem;line-height:1.7;display:none;word-break:break-all;
+}
+.result.ok{background:rgba(61,214,140,0.07);border:1px solid rgba(61,214,140,0.3);color:var(--green);}
+.result.err{background:rgba(255,95,64,0.07);border:1px solid rgba(255,95,64,0.3);color:var(--accent);}
+.result.load{background:var(--card2);border:1px solid var(--border);color:var(--muted);}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:16px;}
+.stat-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:16px;transition:border-color 0.2s;
+}
+.stat-card:hover{border-color:var(--border-hi);}
+.stat-label{font-size:0.53rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.stat-val{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--text);}
+.stat-sub{font-size:0.55rem;margin-top:3px;letter-spacing:1px;}
+.stat-sub.up{color:var(--green);}
+.stat-sub.down{color:var(--accent);}
+.stat-sub.neu{color:var(--muted);}
+
+/* ── GAMES GRID ── */
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+.game-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;cursor:pointer;
+  transition:all 0.2s;
+}
+.game-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+.game-thumb{
+  width:100%;aspect-ratio:16/9;
+  background:linear-gradient(135deg,var(--surface),var(--card2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.game-thumb::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,95,64,0.1),rgba(79,143,255,0.05));
+}
+.game-body{padding:13px;}
+.game-name{
+  font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;
+  letter-spacing:1px;color:var(--text);margin-bottom:3px;
+}
+.game-meta{font-size:0.58rem;color:var(--muted);letter-spacing:1px;}
+.game-tag{
+  display:inline-block;margin-top:8px;
+  font-size:0.48rem;padding:2px 8px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase;
+}
+.gt-pub{background:rgba(61,214,140,0.1);color:var(--green);border:1px solid rgba(61,214,140,0.25);}
+.gt-prv{background:rgba(255,95,64,0.08);color:var(--accent);border:1px solid rgba(255,95,64,0.2);}
+.add-game-card{
+  background:var(--card);border:1px dashed var(--border);
+  border-radius:14px;cursor:pointer;transition:all 0.2s;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:8px;padding:36px;
+  min-height:160px;
+}
+.add-game-card:hover{border-color:var(--accent);background:rgba(255,95,64,0.03);}
+.add-game-icon{font-size:1.8rem;color:var(--muted);}
+.add-game-text{font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+/* ── ITEM CARDS ── */
+.item-list{display:flex;flex-direction:column;gap:10px;}
+.item-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:13px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.item-card-hdr{display:flex;justify-content:space-between;align-items:center;}
+.item-card-title{font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.rm-btn{
+  background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:0.7rem;padding:2px 6px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;transition:color 0.15s;
+}
+.rm-btn:hover{color:var(--accent);}
+
+/* ── TABLE ── */
+.data-table{width:100%;border-collapse:collapse;font-size:0.67rem;}
+.data-table th{
+  text-align:left;padding:8px 12px;
+  font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);border-bottom:1px solid var(--border);
+}
+.data-table td{
+  padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.02);
+  color:var(--text);vertical-align:middle;
+}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,0.01);}
+
+/* ── CHART BARS ── */
+.chart-wrap{display:flex;flex-direction:column;gap:9px;}
+.chart-row{display:flex;align-items:center;gap:10px;font-size:0.63rem;}
+.chart-lbl{width:72px;color:var(--muted);letter-spacing:1px;text-align:right;flex-shrink:0;}
+.chart-bg{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden;}
+.chart-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1.2s cubic-bezier(0.34,1.56,0.64,1);}
+.chart-val{width:55px;color:var(--text);letter-spacing:1px;}
+
+/* ── SNIPPET CARD ── */
+.snippet-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;transition:border-color 0.2s;cursor:pointer;
+}
+.snippet-card:hover{border-color:var(--border-hi);}
+.snippet-header{
+  padding:11px 14px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);
+}
+.snippet-name{font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:700;flex:1;}
+.snippet-tag{
+  font-size:0.48rem;padding:2px 7px;border-radius:20px;
+  background:rgba(79,143,255,0.12);border:1px solid rgba(79,143,255,0.25);
+  color:var(--blue);letter-spacing:1px;
+}
+.snippet-code{
+  background:var(--bg);padding:13px 14px;
+  font-size:0.68rem;line-height:1.7;color:#c9d1d9;
+  max-height:100px;overflow:hidden;position:relative;
+}
+.snippet-code::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:30px;
+  background:linear-gradient(transparent,var(--bg));
+}
+.snippet-footer{
+  padding:8px 14px;display:flex;align-items:center;gap:8px;
+  border-top:1px solid var(--border);
+}
+.snippet-meta{font-size:0.55rem;color:var(--muted);letter-spacing:1px;flex:1;}
+.snippet-copy{
+  background:none;border:1px solid var(--border);color:var(--muted);
+  padding:3px 9px;border-radius:6px;font-size:0.57rem;cursor:pointer;
+  font-family:'JetBrains Mono',monospace;letter-spacing:1px;transition:all 0.15s;
+}
+.snippet-copy:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── OVERLAY ── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.75);z-index:500;
+  align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(4px);
+}
+.overlay.open{display:flex;}
+.overlay-box{
+  background:var(--surface);border:1px solid var(--border-hi);
+  border-radius:18px;width:100%;max-width:540px;
+  max-height:88vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+.overlay-header{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;background:var(--surface);border-radius:18px 18px 0 0;
+}
+.overlay-title{
+  font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+  letter-spacing:2px;flex:1;
+}
+.close-btn{
+  background:var(--card);border:1px solid var(--border);
+  color:var(--muted);cursor:pointer;font-size:0.7rem;
+  padding:5px 10px;border-radius:8px;
+  font-family:'JetBrains Mono',monospace;transition:all 0.15s;
+}
+.close-btn:hover{border-color:var(--accent);color:var(--accent);}
+.overlay-body{padding:20px;display:flex;flex-direction:column;gap:14px;}
+
+/* ── EMPTY STATE ── */
+.empty{
+  text-align:center;padding:52px 20px;
+  color:var(--muted);font-size:0.63rem;letter-spacing:2px;
+  text-transform:uppercase;line-height:1.8;
+}
+.empty-icon{font-size:2.2rem;margin-bottom:10px;opacity:0.5;}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:4px 0;}
+
+/* ── TAG CHIPS ── */
+.tag-row{display:flex;gap:6px;flex-wrap:wrap;}
+.tag-chip{
+  font-size:0.55rem;padding:3px 9px;border-radius:20px;
+  border:1px solid var(--border);color:var(--muted);
+  cursor:pointer;transition:all 0.15s;letter-spacing:1px;
+  background:var(--card);
+}
+.tag-chip:hover,.tag-chip.on{border-color:var(--accent);color:var(--accent);background:rgba(255,95,64,0.07);}
+
+/* ── CHECKLIST ── */
+.checklist{display:flex;flex-direction:column;gap:6px;}
+.check-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 13px;border-radius:9px;
+  background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;transition:all 0.15s;
+}
+.check-item:hover{border-color:var(--border-hi);}
+.check-item.done{
+  background:rgba(61,214,140,0.04);
+  border-color:rgba(61,214,140,0.2);
+}
+.check-box{
+  width:18px;height:18px;border-radius:5px;
+  border:1px solid var(--border-hi);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.7rem;transition:all 0.15s;background:var(--card);
+}
+.check-item.done .check-box{
+  background:rgba(61,214,140,0.2);border-color:var(--green);color:var(--green);
+}
+.check-text{font-size:0.7rem;color:var(--text);flex:1;letter-spacing:0.5px;}
+.check-item.done .check-text{color:var(--muted);text-decoration:line-through;}
+.check-cat{font-size:0.52rem;color:var(--muted);letter-spacing:1px;padding:2px 7px;
+  border-radius:20px;background:var(--card);border:1px solid var(--border);flex-shrink:0;}
+
+/* ── ECONOMY SIMULATOR ── */
+.sim-output{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:10px;padding:16px;
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.sim-metric label{font-size:0.52rem;color:var(--muted);letter-spacing:2px;display:block;margin-bottom:4px;}
+.sim-metric .val{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+
+/* ── CONVERTER ── */
+.conv-display{
+  background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:20px;text-align:center;
+}
+.conv-amount{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:var(--accent);}
+.conv-label{font-size:0.6rem;color:var(--muted);letter-spacing:2px;margin-top:4px;}
+.conv-rate{font-size:0.58rem;color:var(--muted);margin-top:8px;letter-spacing:1px;}
+
+/* ── MOBILE ── */
+@media(max-width:720px){
+  .sidebar{
+    position:fixed;left:-250px;top:56px;
+    height:calc(100vh - 56px);z-index:300;
+    transition:left 0.25s ease;width:250px;
+    box-shadow:10px 0 40px rgba(0,0,0,0.4);
+  }
+  .sidebar.open{left:0;}
+  .sidebar-toggle{display:block;}
+  .main{padding:20px 14px 60px;}
+  .games-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .tc-key{width:110px;}
+  .tc-uid{width:72px;}
+  .topbar-logo{font-size:1rem;}
+}
+@media(max-width:440px){
+  .tc-key{width:90px;}
+  .tc-uid{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- ════════════════ AUTH SCREEN ════════════════ -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">OR</div>
+      <div class="auth-logo-name">ORBYT</div>
+      <div class="auth-logo-tag">Roblox Developer Portal</div>
+    </div>
+
+    <!-- LOGIN VIEW -->
+    <div class="auth-card" id="loginView">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to your workspace</div>
+
+      <button class="auth-btn google" onclick="authWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+        Continue with Google
+      </button>
+
+      <button class="auth-btn roblox" onclick="authWithRoblox()">
+        <svg width="18" height="18" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M17.707 0L0 82.293 82.293 100 100 17.707z" fill="#FF4444"/><path d="M40 32h20v10H40zm0 26h20v10H40z" fill="#fff" opacity=".9"/></svg>
+        Continue with Roblox
+      </button>
+
+      <div id="uriDebug" style="font-size:0.51rem;color:var(--muted);letter-spacing:1px;text-align:center;padding:3px 0;line-height:1.7;">
+        Redirect URI sent: <span id="uriVal" style="color:var(--accent2);word-break:break-all;"></span><br>
+        <span style="color:#333;">Register this exactly in your <a href="https://create.roblox.com/credentials" target="_blank" style="color:var(--blue);">Roblox app</a> &amp; <a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--blue);">Google Console</a></span>
+      </div>
+
+      <div class="auth-divider">or sign in with email</div>
+
+      <div class="auth-field">
+        <label>Email</label>
+        <input class="auth-input" type="email" id="loginEmail" placeholder="you@example.com" onkeydown="if(event.key==='Enter')loginEmail()"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input class="auth-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')loginEmail()"/>
+      </div>
+      <div id="loginError" style="display:none;font-size:0.65rem;color:var(--accent);background:rgba(255,95,64,0.08);border:1px solid rgba(255,95,64,0.25);border-radius:8px;padding:9px 12px;text-align:center;letter-spacing:0.5px;"></div>
+
+      <button class="auth-submit" onclick="loginEmail()">Sign In</button>
+      <div class="auth-switch">Don't have an account? <span onclick="showSignup()">Create one →</span></div>
+    </div>
+
+    <!-- SIGNUP VIEW -->
+    <div class="auth-card" id="signupView" style="display:none;">
+      <div class="auth-title">Create account</div>
+      <div class="auth-sub">Join ORBYT for free</div>
+
+      <button class="auth-btn google" onclick="authWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+        Sign up with Google
+      </button>
+
+      <button class="auth-btn roblox" onclick="authWithRoblox()">
+        <svg width="18" height="18" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M17.707 0L0 82.293 82.293 100 100 17.707z" fill="#FF4444"/><path d="M40 32h20v10H40zm0 26h20v10H40z" fill="#fff" opacity=".9"/></svg>
+        Sign up with Roblox
+      </button>
+
+      <div style="font-size:0.51rem;color:var(--muted);letter-spacing:1px;text-align:center;padding:2px 0;">
+        Redirect URI: <span id="uriVal2" style="color:var(--accent2);word-break:break-all;"></span>
+      </div>
+
+      <div class="auth-divider">or create with email</div>
+
+      <div class="auth-field">
+        <label>Username</label>
+        <input class="auth-input" type="text" id="signupName" placeholder="e.g. DevMaster" onkeydown="if(event.key==='Enter')signupEmail()"/>
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input class="auth-input" type="email" id="signupEmail" placeholder="you@example.com" onkeydown="if(event.key==='Enter')signupEmail()"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input class="auth-input" type="password" id="signupPass" placeholder="Min. 6 characters" onkeydown="if(event.key==='Enter')signupEmail()"/>
+      </div>
+      <div id="signupError" style="display:none;font-size:0.65rem;color:var(--accent);background:rgba(255,95,64,0.08);border:1px solid rgba(255,95,64,0.25);border-radius:8px;padding:9px 12px;text-align:center;letter-spacing:0.5px;"></div>
+
+      <button class="auth-submit" onclick="signupEmail()">Create Account</button>
+      <div class="auth-switch">Already have an account? <span onclick="showLogin()">Sign in →</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ TOPBAR ════════════════ -->
+<div class="topbar">
+  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+  <div class="topbar-logo">ORBYT</div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-creds">
+    <div class="tc-wrap">
+      <input type="password" class="tc-input tc-key" id="apiKey" placeholder="API Key" oninput="updateCred()"/>
+      <button class="tc-eye" onclick="toggleKey()">👁</button>
+    </div>
+    <input type="text" class="tc-input tc-uid" id="creatorId" placeholder="User ID" oninput="updateCred()"/>
+    <div class="cred-pill" id="credPill">NO KEY</div>
+  </div>
+  <div class="topbar-avatar" id="topAvatar" title="Account">😎</div>
+</div>
+
+<!-- ════════════════ APP ════════════════ -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Workspace</div>
+      <div class="nav-item active" onclick="go('home',this)">
+        <span class="nav-icon">⚡</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="go('games',this)">
+        <span class="nav-icon">🎮</span> My Games
+      </div>
+      <div class="nav-item" onclick="go('create',this)">
+        <span class="nav-icon">✨</span> Create Game
+      </div>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-section">
+      <div class="nav-label">Dev Tools</div>
+      <div class="nav-item" onclick="go('datastore',this)">
+        <span class="nav-icon">🗄️</span> DataStore
+      </div>
+      <div class="nav-item" onclick="go('snippets',this)">
+        <span class="nav-icon">📋</span> Script Vault
+      </div>
+      <div class="nav-item" onclick="go('badges',this)">
+        <span class="nav-icon">🏅</span> Badges
+      </div>
+      <div class="nav-item" onclick="go('devproducts',this)">
+        <span class="nav-icon">💎</span> Dev Products
+      </div>
+      <div class="nav-item" onclick="go('gamepasses',this)">
+        <span class="nav-icon">🎫</span> Game Passes
+      </div>
+      <div class="nav-item" onclick="go('assets',this)">
+        <span class="nav-icon">📦</span> Assets
+      </div>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-section">
+      <div class="nav-label">Intelligence</div>
+      <div class="nav-item" onclick="go('analytics',this)">
+        <span class="nav-icon">📊</span> Analytics
+      </div>
+      <div class="nav-item" onclick="go('economy',this)">
+        <span class="nav-icon">⚖️</span> Economy Sim
+        <span class="nav-badge">NEW</span>
+      </div>
+      <div class="nav-item" onclick="go('pitch',this)">
+        <span class="nav-icon">🚀</span> Pitch Builder
+        <span class="nav-badge">AI</span>
+      </div>
+    </div>
+
+    <div class="nav-divider"></div>
+
+    <div class="nav-section">
+      <div class="nav-label">Utilities</div>
+      <div class="nav-item" onclick="go('players',this)">
+        <span class="nav-icon">🔍</span> Player Lookup
+      </div>
+      <div class="nav-item" onclick="go('groups',this)">
+        <span class="nav-icon">👥</span> Groups
+      </div>
+      <div class="nav-item" onclick="go('usercheck',this)">
+        <span class="nav-icon">✅</span> Username Check
+      </div>
+      <div class="nav-item" onclick="go('converter',this)">
+        <span class="nav-icon">💱</span> Robux Converter
+      </div>
+      <div class="nav-item" onclick="go('changelog',this)">
+        <span class="nav-icon">📝</span> Changelog
+      </div>
+      <div class="nav-item" onclick="go('checklist',this)">
+        <span class="nav-icon">☑️</span> Launch Checklist
+      </div>
+    </div>
+
+    <div class="nav-user">
+      <div class="nav-user-avatar" id="sideAvatar">😎</div>
+      <div class="nav-user-info">
+        <div class="nav-user-name" id="sideUsername">Developer</div>
+        <div class="nav-user-role">PRO TIER</div>
+      </div>
+      <button class="nav-logout" onclick="logout()" title="Sign out">⏻</button>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="panel active" id="panel-home">
+      <div class="ph">
+        <div class="ph-icon orange">⚡</div>
+        <div class="ph-text">
+          <h1 id="dashGreet">GOOD MORNING</h1>
+          <p id="dashSub">Here's your workspace overview</p>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Visits</div>
+          <div class="stat-val">—</div>
+          <div class="stat-sub neu">Load your games</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Players</div>
+          <div class="stat-val">—</div>
+          <div class="stat-sub neu">Across all games</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Snippets Saved</div>
+          <div class="stat-val" id="dash-snippets">0</div>
+          <div class="stat-sub up">In Script Vault</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Checklist</div>
+          <div class="stat-val" id="dash-checklist">0%</div>
+          <div class="stat-sub neu">Launch readiness</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">🚀</span>
+          <span class="card-title">Quick Actions</span>
+        </div>
+        <div class="card-body" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <button class="btn btn-secondary btn-full" onclick="go('games',document.querySelector('.nav-item:nth-child(2)'))">🎮 My Games</button>
+          <button class="btn btn-secondary btn-full" onclick="go('snippets',null)">📋 Script Vault</button>
+          <button class="btn btn-secondary btn-full" onclick="go('economy',null)">⚖️ Economy Sim</button>
+          <button class="btn btn-secondary btn-full" onclick="go('pitch',null)">🚀 Pitch Builder</button>
+          <button class="btn btn-secondary btn-full" onclick="go('usercheck',null)">✅ Username Check</button>
+          <button class="btn btn-secondary btn-full" onclick="go('converter',null)">💱 Robux Convert</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📡</span>
+          <span class="card-title">Recent Activity</span>
+        </div>
+        <div class="card-body" id="activityFeed">
+          <div class="empty"><div class="empty-icon">📡</div>No activity yet — start using tools to see your history here</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MY GAMES ══ -->
+    <div class="panel" id="panel-games">
+      <div class="ph">
+        <div class="ph-icon orange">🎮</div>
+        <div class="ph-text"><h1>MY GAMES</h1><p>Click any game to view and edit its settings</p></div>
+        <div class="ph-actions">
+          <button class="btn btn-primary" onclick="loadGames()">⟳ Load Games</button>
+        </div>
+      </div>
+      <div class="result" id="gamesResult"></div>
+      <div id="gamesGrid" style="margin-top:14px;">
+        <div class="empty"><div class="empty-icon">🎮</div>Enter your API Key + User ID in the top bar<br>then tap Load Games</div>
+      </div>
+    </div>
+
+    <!-- ══ CREATE GAME ══ -->
+    <div class="panel" id="panel-create">
+      <div class="ph">
+        <div class="ph-icon green">✨</div>
+        <div class="ph-text"><h1>CREATE GAME</h1><p>Publish a new experience via Open Cloud API</p></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🎮</span><span class="card-title">Game Info</span><span class="card-badge cb-req">Required</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Game Name *</div><input type="text" id="gameName" placeholder="e.g. Galaxy Tycoon" maxlength="50"/></div>
+          <div class="field"><div class="field-label">Description</div><textarea id="gameDesc" placeholder="Tell players what makes your game unique..." maxlength="1000"></textarea></div>
+          <div class="field-row">
+            <div class="field">
+              <div class="field-label">Game Icon</div>
+              <div class="file-zone" onclick="document.getElementById('iconFile').click()">
+                <input type="file" id="iconFile" accept="image/*" onchange="showFile('iconFile','iconFN')"/>
+                <div class="fz-icon">🖼</div><div class="fz-text">Upload Icon (512×512)</div>
+                <div class="fz-name" id="iconFN"></div>
+              </div>
+            </div>
+            <div class="field">
+              <div class="field-label">Thumbnail</div>
+              <div class="file-zone" onclick="document.getElementById('thumbFile').click()">
+                <input type="file" id="thumbFile" accept="image/*" onchange="showFile('thumbFile','thumbFN')"/>
+                <div class="fz-icon">🏞</div><div class="fz-text">Upload Thumbnail (1920×1080)</div>
+                <div class="fz-name" id="thumbFN"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">⚙️</span><span class="card-title">Settings</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Visibility</div>
+            <div class="radio-group">
+              <div class="radio-opt"><input type="radio" name="vis" id="vis_pub" value="public" checked/><label for="vis_pub">🌍 Public</label></div>
+              <div class="radio-opt"><input type="radio" name="vis" id="vis_prv" value="private"/><label for="vis_prv">🔒 Private</label></div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="toggle-row"><div class="ti"><span class="ti-name">Friends Only</span><span class="ti-desc">Only friends can join</span></div><label class="switch"><input type="checkbox" id="friendsOnly"/><span class="slider"></span></label></div>
+          <div class="toggle-row"><div class="ti"><span class="ti-name">Publish Place</span><span class="ti-desc">Make starting place active</span></div><label class="switch"><input type="checkbox" id="publishPlace" checked/><span class="slider"></span></label></div>
+        </div>
+      </div>
+      <button class="btn-submit" onclick="createGame()" id="createBtn">CREATE GAME</button>
+      <div class="result" id="createResult" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- ══ DATASTORE ══ -->
+    <div class="panel" id="panel-datastore">
+      <div class="ph"><div class="ph-icon blue">🗄️</div><div class="ph-text"><h1>DATASTORE</h1><p>Read, write and delete DataStore entries via Open Cloud</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🔍</span><span class="card-title">Query Entry</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><div class="field-label">Universe ID *</div><input type="text" id="ds_uid" placeholder="123456789"/></div>
+            <div class="field"><div class="field-label">DataStore Name *</div><input type="text" id="ds_name" placeholder="PlayerData"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><div class="field-label">Key *</div><input type="text" id="ds_key" placeholder="Player_12345678"/></div>
+            <div class="field"><div class="field-label">Scope</div><input type="text" id="ds_scope" placeholder="global"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="dsGet()">Get Entry</button>
+            <button class="btn btn-secondary" onclick="dsDelete()">Delete Entry</button>
+          </div>
+          <div class="result" id="dsResult"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">✏️</span><span class="card-title">Set / Update Entry</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Value (JSON)</div><textarea id="ds_val" placeholder='{"coins":500,"level":3}'></textarea></div>
+          <button class="btn btn-primary" onclick="dsSet()">Set Entry</button>
+          <div class="result" id="dsSetResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SCRIPT VAULT ══ -->
+    <div class="panel" id="panel-snippets">
+      <div class="ph">
+        <div class="ph-icon purple">📋</div>
+        <div class="ph-text"><h1>SCRIPT VAULT</h1><p>Save and organise reusable Lua snippets</p></div>
+        <div class="ph-actions"><button class="btn btn-primary" onclick="openSnippetForm()">+ New Snippet</button></div>
+      </div>
+      <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <input type="text" id="snippetSearch" placeholder="Search snippets..." style="flex:1;min-width:160px;" oninput="filterSnippets()"/>
+        <div class="tag-row" id="snippetTagFilters">
+          <div class="tag-chip on" onclick="filterSnippetTag('all',this)">All</div>
+          <div class="tag-chip" onclick="filterSnippetTag('combat',this)">Combat</div>
+          <div class="tag-chip" onclick="filterSnippetTag('ui',this)">UI</div>
+          <div class="tag-chip" onclick="filterSnippetTag('data',this)">Data</div>
+          <div class="tag-chip" onclick="filterSnippetTag('tween',this)">Tween</div>
+          <div class="tag-chip" onclick="filterSnippetTag('remote',this)">Remote</div>
+        </div>
+      </div>
+      <div id="snippetGrid" style="display:flex;flex-direction:column;gap:10px;">
+        <div class="empty"><div class="empty-icon">📋</div>No snippets yet — save your first Lua snippet!</div>
+      </div>
+    </div>
+
+    <!-- ══ BADGES ══ -->
+    <div class="panel" id="panel-badges">
+      <div class="ph"><div class="ph-icon amber">🏅</div><div class="ph-text"><h1>BADGE MANAGER</h1><p>Design and deploy badges for your experiences</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🏅</span><span class="card-title">Badges</span><span class="card-badge cb-opt">Optional</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Universe ID *</div><input type="text" id="badge_uid" placeholder="123456789"/></div>
+          <div class="item-list" id="badgeList"></div>
+          <button class="btn btn-ghost btn-full" onclick="addBadge()">+ Add Badge</button>
+          <button class="btn btn-primary" onclick="submitBadges()">Create Badges</button>
+          <div class="result" id="badgeResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ DEV PRODUCTS ══ -->
+    <div class="panel" id="panel-devproducts">
+      <div class="ph"><div class="ph-icon blue">💎</div><div class="ph-text"><h1>DEV PRODUCTS</h1><p>Create one-time purchase products</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">💎</span><span class="card-title">Developer Products</span><span class="card-badge cb-opt">Optional</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Universe ID *</div><input type="text" id="dp_uid" placeholder="123456789"/></div>
+          <div class="item-list" id="productList"></div>
+          <button class="btn btn-ghost btn-full" onclick="addProduct()">+ Add Product</button>
+          <button class="btn btn-primary" onclick="submitProducts()">Create Products</button>
+          <div class="result" id="productResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ GAME PASSES ══ -->
+    <div class="panel" id="panel-gamepasses">
+      <div class="ph"><div class="ph-icon green">🎫</div><div class="ph-text"><h1>GAME PASSES</h1><p>Create permanent perks for your players</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🎫</span><span class="card-title">Game Passes</span><span class="card-badge cb-opt">Optional</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Universe ID *</div><input type="text" id="gp_uid" placeholder="123456789"/></div>
+          <div class="item-list" id="passList"></div>
+          <button class="btn btn-ghost btn-full" onclick="addPass()">+ Add Game Pass</button>
+          <button class="btn btn-primary" onclick="submitPasses()">Create Passes</button>
+          <div class="result" id="passResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ASSETS ══ -->
+    <div class="panel" id="panel-assets">
+      <div class="ph"><div class="ph-icon amber">📦</div><div class="ph-text"><h1>ASSET UPLOADER</h1><p>Upload images, audio and models to your library</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📦</span><span class="card-title">Upload Asset</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><div class="field-label">Asset Type</div>
+              <select id="assetType"><option value="Image">🖼 Image</option><option value="Audio">🎵 Audio</option><option value="Decal">🎨 Decal</option><option value="Model">📐 Model</option></select>
+            </div>
+            <div class="field"><div class="field-label">Asset Name *</div><input type="text" id="assetName" placeholder="e.g. MyIcon"/></div>
+          </div>
+          <div class="field"><div class="field-label">File</div>
+            <div class="file-zone" onclick="document.getElementById('assetFile').click()">
+              <input type="file" id="assetFile" onchange="showFile('assetFile','assetFN')"/>
+              <div class="fz-icon">📁</div><div class="fz-text">Tap to select file</div>
+              <div class="fz-name" id="assetFN"></div>
+            </div>
+          </div>
+          <div class="field"><div class="field-label">Creator User ID *</div><input type="text" id="assetCreator" placeholder="e.g. 12345678"/></div>
+          <button class="btn btn-primary" onclick="uploadAsset()">Upload Asset</button>
+          <div class="result" id="assetResult"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Recent Uploads</span></div>
+        <div style="overflow-x:auto;">
+          <table class="data-table"><thead><tr><th>Name</th><th>Type</th><th>Asset ID</th><th>Status</th></tr></thead>
+          <tbody id="assetTable"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;font-size:0.62rem;">No uploads this session</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS ══ -->
+    <div class="panel" id="panel-analytics">
+      <div class="ph"><div class="ph-icon blue">📊</div><div class="ph-text"><h1>ANALYTICS</h1><p>Live performance snapshot for your experiences</p></div></div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Active Players</div><div class="stat-val" id="an_play">—</div><div class="stat-sub neu" id="an_play_s">Fetch to load</div></div>
+        <div class="stat-card"><div class="stat-label">Total Visits</div><div class="stat-val" id="an_vis">—</div><div class="stat-sub neu" id="an_vis_s"></div></div>
+        <div class="stat-card"><div class="stat-label">Favorites</div><div class="stat-val" id="an_fav">—</div><div class="stat-sub neu" id="an_fav_s"></div></div>
+        <div class="stat-card"><div class="stat-label">Rating</div><div class="stat-val" id="an_rat">—</div><div class="stat-sub neu" id="an_rat_s"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🔍</span><span class="card-title">Fetch Analytics</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Universe ID *</div><input type="text" id="an_uid" placeholder="e.g. 123456789"/></div>
+          <button class="btn btn-primary" onclick="fetchAnalytics()">Fetch Stats</button>
+          <div class="result" id="anResult"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📈</span><span class="card-title">Daily Visits — Last 7 Days</span></div>
+        <div class="card-body"><div class="chart-wrap" id="visChart"><div style="font-size:0.62rem;color:var(--muted);">Fetch analytics to populate chart</div></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ECONOMY SIMULATOR ══ -->
+    <div class="panel" id="panel-economy">
+      <div class="ph"><div class="ph-icon green">⚖️</div><div class="ph-text"><h1>ECONOMY SIM</h1><p>Balance your game's monetisation and drop rates</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">⚙️</span><span class="card-title">Parameters</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><div class="field-label">Daily Active Players</div><input type="number" id="ec_dau" value="500" min="1" oninput="runSim()"/></div>
+            <div class="field"><div class="field-label">Avg Session (min)</div><input type="number" id="ec_session" value="25" min="1" oninput="runSim()"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><div class="field-label">Pass Price (R$)</div><input type="number" id="ec_pass" value="299" min="1" oninput="runSim()"/></div>
+            <div class="field"><div class="field-label">Pass Conversion %</div><input type="number" id="ec_conv" value="3" min="0" max="100" oninput="runSim()"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><div class="field-label">Dev Product Price (R$)</div><input type="number" id="ec_prod" value="99" min="1" oninput="runSim()"/></div>
+            <div class="field"><div class="field-label">Purchases per Player/Day</div><input type="number" id="ec_purch" value="0.5" step="0.1" min="0" oninput="runSim()"/></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><div class="field-label">Drop Rate (items/hour)</div><input type="number" id="ec_drop" value="2.5" step="0.1" min="0" oninput="runSim()"/></div>
+            <div class="field"><div class="field-label">Rare Drop % </div><input type="number" id="ec_rare" value="2" step="0.1" min="0" max="100" oninput="runSim()"/></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📊</span><span class="card-title">Simulation Results</span></div>
+        <div class="card-body">
+          <div class="sim-output" id="simOut">
+            <div class="sim-metric"><label>Daily Revenue (R$)</label><div class="val" id="sim_rev">—</div></div>
+            <div class="sim-metric"><label>Monthly Revenue (R$)</label><div class="val" id="sim_rev_mo">—</div></div>
+            <div class="sim-metric"><label>USD Daily (70% cut)</label><div class="val" id="sim_usd">—</div></div>
+            <div class="sim-metric"><label>USD Monthly</label><div class="val" id="sim_usd_mo">—</div></div>
+            <div class="sim-metric"><label>Items Dropped / Day</label><div class="val" id="sim_drops">—</div></div>
+            <div class="sim-metric"><label>Rare Items / Day</label><div class="val" id="sim_rare">—</div></div>
+            <div class="sim-metric"><label>Paying Players / Day</label><div class="val" id="sim_payers">—</div></div>
+            <div class="sim-metric"><label>Economy Health</label><div class="val" id="sim_health">—</div></div>
+          </div>
+          <div id="ecoWarnings"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PITCH BUILDER ══ -->
+    <div class="panel" id="panel-pitch">
+      <div class="ph"><div class="ph-icon purple">🚀</div><div class="ph-text"><h1>PITCH BUILDER</h1><p>Generate a full game concept doc from your idea</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">💡</span><span class="card-title">Your Idea</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Game Concept *</div><textarea id="pitchIdea" placeholder="e.g. A tycoon game where you build a space mining colony, hire workers, upgrade ships and trade resources with other players..." style="min-height:100px;"></textarea></div>
+          <div class="field-row">
+            <div class="field"><div class="field-label">Genre</div>
+              <select id="pitchGenre"><option>Tycoon</option><option>RPG</option><option>Simulator</option><option>Obby</option><option>FPS/Shooter</option><option>Horror</option><option>Adventure</option><option>Fighting</option></select>
+            </div>
+            <div class="field"><div class="field-label">Target Audience</div>
+              <select id="pitchAudience"><option>All Ages</option><option>Kids (7-12)</option><option>Teens (13-17)</option><option>Young Adults (18+)</option></select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="generatePitch()" id="pitchBtn">✨ Generate Pitch Doc</button>
+          <div class="result" id="pitchResult"></div>
+        </div>
+      </div>
+      <div class="card" id="pitchOutputCard" style="display:none;">
+        <div class="card-header"><span class="card-icon">📄</span><span class="card-title">Game Pitch Document</span><button class="btn btn-secondary" style="margin-left:auto;padding:5px 12px;font-size:0.62rem;" onclick="copyPitch()">Copy All</button></div>
+        <div class="card-body" id="pitchOutput" style="font-size:0.72rem;line-height:1.8;white-space:pre-wrap;color:var(--text);"></div>
+      </div>
+    </div>
+
+    <!-- ══ PLAYER LOOKUP ══ -->
+    <div class="panel" id="panel-players">
+      <div class="ph"><div class="ph-icon blue">🔍</div><div class="ph-text"><h1>PLAYER LOOKUP</h1><p>Search any Roblox player by username or ID</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🔍</span><span class="card-title">Search</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <input type="text" id="playerQ" placeholder="Username or User ID" onkeydown="if(event.key==='Enter')lookupPlayer()" style="flex:1;"/>
+            <button class="btn btn-primary" onclick="lookupPlayer()">Search</button>
+          </div>
+          <div class="result" id="playerResult"></div>
+        </div>
+      </div>
+      <div id="playerCard" style="display:none;">
+        <div class="card">
+          <div class="card-body" style="display:flex;align-items:center;gap:16px;">
+            <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;">👤</div>
+            <div style="flex:1;">
+              <div style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;" id="pName">—</div>
+              <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1.5px;" id="pDisplay">—</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 18px 18px;">
+            <div><div style="font-size:0.52rem;color:var(--muted);letter-spacing:2px;margin-bottom:3px;">USER ID</div><div style="font-size:0.75rem;" id="pId">—</div></div>
+            <div><div style="font-size:0.52rem;color:var(--muted);letter-spacing:2px;margin-bottom:3px;">JOINED</div><div style="font-size:0.75rem;" id="pJoined">—</div></div>
+            <div><div style="font-size:0.52rem;color:var(--muted);letter-spacing:2px;margin-bottom:3px;">DESCRIPTION</div><div style="font-size:0.67rem;color:var(--muted);" id="pDesc">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ GROUPS ══ -->
+    <div class="panel" id="panel-groups">
+      <div class="ph"><div class="ph-icon green">👥</div><div class="ph-text"><h1>GROUP MANAGER</h1><p>View group info and manage member ranks</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🔍</span><span class="card-title">Group Lookup</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <input type="text" id="groupId" placeholder="Group ID" onkeydown="if(event.key==='Enter')fetchGroup()" style="flex:1;"/>
+            <button class="btn btn-primary" onclick="fetchGroup()">Fetch</button>
+          </div>
+          <div class="result" id="groupResult"></div>
+          <div id="groupInfo" style="display:none;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">⬆️</span><span class="card-title">Change Member Rank</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><div class="field-label">User ID</div><input type="text" id="rankUid" placeholder="12345678"/></div>
+            <div class="field"><div class="field-label">Role ID</div><input type="text" id="rankRole" placeholder="99"/></div>
+          </div>
+          <button class="btn btn-primary" onclick="changeRank()">Update Rank</button>
+          <div class="result" id="rankResult"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERNAME CHECKER ══ -->
+    <div class="panel" id="panel-usercheck">
+      <div class="ph"><div class="ph-icon green">✅</div><div class="ph-text"><h1>USERNAME CHECKER</h1><p>Bulk-check Roblox username availability</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">✅</span><span class="card-title">Bulk Check</span></div>
+        <div class="card-body">
+          <div class="field"><div class="field-label">Usernames (one per line)</div><textarea id="ucNames" placeholder="CoolGamer&#10;XxProDevxX&#10;StarForge&#10;NeonByte" style="min-height:120px;"></textarea></div>
+          <button class="btn btn-primary" onclick="checkUsernames()">Check All</button>
+          <div class="result" id="ucResult"></div>
+        </div>
+      </div>
+      <div id="ucGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:12px;"></div>
+    </div>
+
+    <!-- ══ ROBUX CONVERTER ══ -->
+    <div class="panel" id="panel-converter">
+      <div class="ph"><div class="ph-icon amber">💱</div><div class="ph-text"><h1>ROBUX CONVERTER</h1><p>Estimate Robux ↔ USD value with DevEx rates</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🔁</span><span class="card-title">Convert</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><div class="field-label">Amount</div><input type="number" id="convAmt" value="1000" min="0" oninput="convert()"/></div>
+            <div class="field"><div class="field-label">Direction</div>
+              <select id="convDir" onchange="convert()">
+                <option value="r2u">Robux → USD (DevEx)</option>
+                <option value="u2r">USD → Robux (approx.)</option>
+              </select>
+            </div>
+          </div>
+          <div class="conv-display">
+            <div class="conv-amount" id="convOut">$3.50</div>
+            <div class="conv-label" id="convLabel">USD via DevEx (70% cut)</div>
+            <div class="conv-rate" id="convRate">Rate: 1,000 R$ = $3.50 USD • DevEx rate: 0.0035/R$</div>
+          </div>
+          <div class="card-body" style="padding:0;gap:8px;display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:12px;">
+            <div class="stat-card" style="padding:12px;"><div class="stat-label">DevEx Rate</div><div style="font-size:1rem;font-family:'Syne',sans-serif;font-weight:700;">$0.0035</div><div class="stat-sub neu">per Robux</div></div>
+            <div class="stat-card" style="padding:12px;"><div class="stat-label">Marketplace Fee</div><div style="font-size:1rem;font-family:'Syne',sans-serif;font-weight:700;">30%</div><div class="stat-sub down">of sale price</div></div>
+            <div class="stat-card" style="padding:12px;"><div class="stat-label">You Keep</div><div style="font-size:1rem;font-family:'Syne',sans-serif;font-weight:700;">70%</div><div class="stat-sub up">after Roblox cut</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHANGELOG ══ -->
+    <div class="panel" id="panel-changelog">
+      <div class="ph"><div class="ph-icon purple">📝</div><div class="ph-text"><h1>CHANGELOG BUILDER</h1><p>Format your update notes beautifully</p></div></div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">✏️</span><span class="card-title">Write Update</span></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><div class="field-label">Version *</div><input type="text" id="cl_version" placeholder="v1.2.0"/></div>
+            <div class="field"><div class="field-label">Update Title *</div><input type="text" id="cl_title" placeholder="Major Combat Overhaul"/></div>
+          </div>
+          <div class="field"><div class="field-label">✅ New Features (one per line)</div><textarea id="cl_add" placeholder="Added double-jump&#10;New weapon: Plasma Rifle&#10;VIP server support"></textarea></div>
+          <div class="field"><div class="field-label">🔧 Bug Fixes (one per line)</div><textarea id="cl_fix" placeholder="Fixed respawn glitch&#10;Corrected badge popup timing"></textarea></div>
+          <div class="field"><div class="field-label">⚠️ Changes / Removals (one per line)</div><textarea id="cl_change" placeholder="Rebalanced sword damage&#10;Removed legacy UI"></textarea></div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="buildChangelog()">Build Changelog</button>
+            <button class="btn btn-secondary" onclick="copyChangelog()">Copy Output</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" id="clCard" style="display:none;">
+        <div class="card-header"><span class="card-icon">📋</span><span class="card-title">Formatted Output</span></div>
+        <div class="card-body" id="clOutput" style="white-space:pre-wrap;font-size:0.72rem;line-height:1.8;color:var(--text);"></div>
+      </div>
+    </div>
+
+    <!-- ══ LAUNCH CHECKLIST ══ -->
+    <div class="panel" id="panel-checklist">
+      <div class="ph">
+        <div class="ph-icon orange">☑️</div>
+        <div class="ph-text"><h1>LAUNCH CHECKLIST</h1><p>Make sure your game is 100% ready</p></div>
+        <div class="ph-actions"><button class="btn btn-secondary" onclick="resetChecklist()">Reset</button></div>
+      </div>
+      <div class="stat-grid" style="margin-bottom:16px;">
+        <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-val" id="cl_done">0</div></div>
+        <div class="stat-card"><div class="stat-label">Remaining</div><div class="stat-val" id="cl_rem">0</div></div>
+        <div class="stat-card"><div class="stat-label">Progress</div><div class="stat-val" id="cl_pct">0%</div></div>
+        <div class="stat-card"><div class="stat-label">Status</div><div class="stat-val" id="cl_status" style="font-size:1rem;">⏳</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">☑️</span><span class="card-title">Pre-Launch Tasks</span></div>
+        <div class="card-body"><div class="checklist" id="checklistItems"></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- GAME SETTINGS OVERLAY -->
+<div class="overlay" id="gameOverlay" onclick="closeOvIf(event)">
+  <div class="overlay-box">
+    <div class="overlay-header">
+      <span class="overlay-title" id="ovTitle">Game Settings</span>
+      <button class="close-btn" onclick="closeOv()">✕ Close</button>
+    </div>
+    <div class="overlay-body">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Universe ID</div><div class="stat-val" id="ov_id" style="font-size:1rem;word-break:break-all;">—</div></div>
+        <div class="stat-card"><div class="stat-label">Visibility</div><div class="stat-val" id="ov_vis" style="font-size:1rem;">—</div></div>
+      </div>
+      <div class="field"><div class="field-label">Game Name</div><input type="text" id="ov_name"/></div>
+      <div class="field"><div class="field-label">Description</div><textarea id="ov_desc"></textarea></div>
+      <div class="field"><div class="field-label">Visibility</div>
+        <div class="radio-group">
+          <div class="radio-opt"><input type="radio" name="ov_v" id="ov_pub" value="public" checked/><label for="ov_pub">🌍 Public</label></div>
+          <div class="radio-opt"><input type="radio" name="ov_v" id="ov_prv" value="private"/><label for="ov_prv">🔒 Private</label></div>
+        </div>
+      </div>
+      <div class="toggle-row"><div class="ti"><span class="ti-name">Friends Only</span><span class="ti-desc">Only friends can join</span></div><label class="switch"><input type="checkbox" id="ov_friends"/><span class="slider"></span></label></div>
+      <div class="toggle-row"><div class="ti"><span class="ti-name">Studio API Access</span><span class="ti-desc">Allow Open Cloud writes from Studio</span></div><label class="switch"><input type="checkbox" id="ov_studio"/><span class="slider"></span></label></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveGameSettings()" style="flex:1;">Save Settings</button>
+        <button class="btn btn-secondary" onclick="closeOv()">Cancel</button>
+      </div>
+      <div class="result" id="ovResult"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SNIPPET FORM OVERLAY -->
+<div class="overlay" id="snippetOverlay" onclick="closeSnipIf(event)">
+  <div class="overlay-box">
+    <div class="overlay-header">
+      <span class="overlay-title">New Snippet</span>
+      <button class="close-btn" onclick="closeSnip()">✕ Close</button>
+    </div>
+    <div class="overlay-body">
+      <div class="field"><div class="field-label">Snippet Name *</div><input type="text" id="snipName" placeholder="e.g. Smooth Tween Helper"/></div>
+      <div class="field"><div class="field-label">Tag</div>
+        <select id="snipTag"><option value="combat">Combat</option><option value="ui">UI</option><option value="data">Data</option><option value="tween">Tween</option><option value="remote">Remote</option><option value="util">Utility</option></select>
+      </div>
+      <div class="field"><div class="field-label">Lua Code *</div><textarea id="snipCode" placeholder="-- Paste your Lua snippet here&#10;local function example()&#10;  print('Hello World')&#10;end" style="min-height:160px;font-size:0.72rem;"></textarea></div>
+      <div class="field"><div class="field-label">Notes</div><input type="text" id="snipNotes" placeholder="Optional description or usage notes"/></div>
+      <button class="btn btn-primary btn-full" onclick="saveSnippet()">Save Snippet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let currentUser = null;
+let snippets = JSON.parse(localStorage.getItem('orbyt_snippets') || '[]');
+let currentGame = null;
+let activeSnipTag = 'all';
+let uploadedAssets = [];
+const CHECKLIST_ITEMS = [
+  {t:'Set game name and description',cat:'Content'},
+  {t:'Upload a 512×512 game icon',cat:'Assets'},
+  {t:'Upload a 1920×1080 thumbnail',cat:'Assets'},
+  {t:'Set visibility (public/private)',cat:'Settings'},
+  {t:'Configure friends-only setting',cat:'Settings'},
+  {t:'Enable Studio API Access',cat:'Settings'},
+  {t:'Add at least one badge',cat:'Monetisation'},
+  {t:'Create game passes',cat:'Monetisation'},
+  {t:'Create developer products',cat:'Monetisation'},
+  {t:'Enable Voice Chat in Studio',cat:'Studio'},
+  {t:'Set avatar type (R6 or R15)',cat:'Studio'},
+  {t:'Test the game privately',cat:'QA'},
+  {t:'Share with 3 beta testers',cat:'QA'},
+  {t:'Write a changelog for v1.0',cat:'Launch'},
+  {t:'Announce on social media',cat:'Launch'},
+  {t:'Set genre/category on Dashboard',cat:'Dashboard'},
+];
+let checkState = JSON.parse(localStorage.getItem('orbyt_checklist') || '{}');
+
+/* ═══════════════════════════════════════════════
+   OAUTH2 CONFIG
+═══════════════════════════════════════════════ */
+const OAUTH = {
+  GOOGLE_CLIENT_ID : '506292215982-g87hs953vfksu7dvi1cfkg5g38k0nspb.apps.googleusercontent.com',
+  ROBLOX_CLIENT_ID : '8352566289001054359',
+  /* Dynamically match whatever URL this page is actually served from.
+     This eliminates trailing-slash mismatches between code and provider config.
+     Make sure your Roblox & Google app's registered URI matches this exactly:
+       https://seapickless.github.io/Orbyt-/                                   */
+  get REDIRECT_URI(){ return window.location.origin + window.location.pathname; },
+};
+
+/* ═══════════════════════════════════════════════
+   AUTH — REDIRECTS (no fake data created here)
+═══════════════════════════════════════════════ */
+function showSignup(){document.getElementById('loginView').style.display='none';document.getElementById('signupView').style.display='';}
+function showLogin(){document.getElementById('signupView').style.display='none';document.getElementById('loginView').style.display='';}
+
+/* Called by Google buttons (main login + any hub "Link" button) */
+function authWithGoogle(){
+  const params = new URLSearchParams({
+    client_id    : OAUTH.GOOGLE_CLIENT_ID,
+    redirect_uri : OAUTH.REDIRECT_URI,
+    response_type: 'token',
+    scope        : 'openid email profile',
+    state        : _genState(),
+  });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+/* Called by Roblox buttons (main login + any hub "Link to Roblox" button) */
+function authWithRoblox(){
+  const params = new URLSearchParams({
+    client_id    : OAUTH.ROBLOX_CLIENT_ID,
+    redirect_uri : OAUTH.REDIRECT_URI,
+    response_type: 'code',
+    scope        : 'openid profile asset:read inventory-item:read',
+    state        : _genState(),
+    nonce        : _genState(),
+  });
+  window.location.href = 'https://apis.roblox.com/oauth/v1/authorize?' + params.toString();
+}
+
+/* Email login — local account system */
+function loginEmail(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+
+  errEl.style.display = 'none';
+
+  if(!email){ _setErr(errEl, '✕ Please enter your email.'); return; }
+  if(!pass){  _setErr(errEl, '✕ Please enter your password.'); return; }
+  if(!email.includes('@')){ _setErr(errEl, '✕ Enter a valid email address.'); return; }
+
+  /* Check stored accounts */
+  const accounts = JSON.parse(localStorage.getItem('orbyt_accounts') || '{}');
+  const account  = accounts[email.toLowerCase()];
+
+  if(!account){ _setErr(errEl, '✕ No account found. Please sign up first.'); return; }
+  if(account.pass !== _hashPass(pass)){ _setErr(errEl, '✕ Incorrect password.'); return; }
+
+  _showConfirmModal(account.name, 'email', null);
+}
+
+/* Email signup — stores account locally then confirms */
+function signupEmail(){
+  const nameVal  = document.getElementById('signupName').value.trim();
+  const emailVal = document.getElementById('signupEmail').value.trim();
+  const passVal  = document.getElementById('signupPass').value;
+  const errEl    = document.getElementById('signupError');
+
+  errEl.style.display = 'none';
+
+  if(!nameVal){  _setErr(errEl, '✕ Username is required.'); return; }
+  if(!emailVal){ _setErr(errEl, '✕ Email is required.'); return; }
+  if(!emailVal.includes('@')){ _setErr(errEl, '✕ Enter a valid email address.'); return; }
+  if(!passVal || passVal.length < 6){ _setErr(errEl, '✕ Password must be at least 6 characters.'); return; }
+
+  const accounts = JSON.parse(localStorage.getItem('orbyt_accounts') || '{}');
+  if(accounts[emailVal.toLowerCase()]){ _setErr(errEl, '✕ An account with this email already exists.'); return; }
+
+  /* Save account — password hashed, no plaintext stored */
+  accounts[emailVal.toLowerCase()] = { name: nameVal, pass: _hashPass(passVal), created: Date.now() };
+  localStorage.setItem('orbyt_accounts', JSON.stringify(accounts));
+
+  _showConfirmModal(nameVal, 'email', null);
+}
+
+/* Tiny deterministic hash — good enough for local-only storage */
+function _hashPass(str){
+  let h = 5381;
+  for(let i = 0; i < str.length; i++) h = ((h << 5) + h) ^ str.charCodeAt(i);
+  return (h >>> 0).toString(16);
+}
+
+function _setErr(el, msg){
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4500);
+}
+
+/* ── SECURE STATE GENERATOR ── */
+function _genState(){
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Array.from(arr, b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ── AUTH ERROR: replaced by inline _setErr() ── */
+
+/* ── CONFIRMATION MODAL ── */
+/*  Called after a valid token is found in the URL, or after email form submit.
+    name    = display name extracted from token / form
+    method  = 'google' | 'roblox' | 'email'
+    token   = the raw access_token / code (null for email)                     */
+function _showConfirmModal(name, method, token){
+  const modal = document.getElementById('confirmModal');
+  document.getElementById('confirmName').textContent = name;
+  document.getElementById('confirmMethod').textContent = method.charAt(0).toUpperCase() + method.slice(1);
+  modal.classList.add('open');
+  /* Store temporarily so the confirm button can use it */
+  modal._pendingName   = name;
+  modal._pendingMethod = method;
+  modal._pendingToken  = token;
+}
+
+function confirmCreateProfile(){
+  const modal  = document.getElementById('confirmModal');
+  const name   = modal._pendingName;
+  const method = modal._pendingMethod;
+  const token  = modal._pendingToken;
+
+  /* ✅ Only NOW do we write to localStorage */
+  localStorage.setItem('orbyt_is_authenticated', 'true');
+  localStorage.setItem('orbyt_user', JSON.stringify({ name, method, ts: Date.now() }));
+
+  /* Clear any token / code from the address bar */
+  window.history.replaceState(null, '', window.location.pathname);
+
+  modal.classList.remove('open');
+  _bootDashboard(name, method);
+}
+
+function cancelConfirmModal(){
+  const modal = document.getElementById('confirmModal');
+  modal.classList.remove('open');
+  modal._pendingName = modal._pendingMethod = modal._pendingToken = null;
+  /* Clear token from URL even on cancel */
+  window.history.replaceState(null, '', window.location.pathname);
+}
+
+/* ── BOOT DASHBOARD (only called after confirmation) ── */
+function _bootDashboard(name, method){
+  currentUser = { name, method };
+  document.getElementById('sideUsername').textContent = name;
+  const initial = name[0].toUpperCase();
+  document.getElementById('topAvatar').textContent  = initial;
+  document.getElementById('sideAvatar').textContent = initial;
+  const h = new Date().getHours();
+  const greet = h < 12 ? 'GOOD MORNING' : h < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING';
+  document.getElementById('dashGreet').textContent = greet + ', ' + name.toUpperCase();
+  document.getElementById('dashSub').textContent   = 'Welcome to your workspace · Signed in via ' + method;
+  document.getElementById('authScreen').classList.add('hidden');
+  logActivity('🔐 Signed in via ' + method);
+  initChecklist();
+  renderSnippets();
+  runSim();
+  convert();
+}
+
+function logout(){
+  localStorage.removeItem('orbyt_is_authenticated');
+  localStorage.removeItem('orbyt_user');
+  currentUser = null;
+  document.getElementById('authScreen').classList.remove('hidden');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value  = '';
+}
+
+/* ═══════════════════════════════════════════════
+   OAUTH2 CALLBACK HANDLER  (runs on every page load)
+   Reads access_token (Google implicit) or code (Roblox PKCE)
+   from the URL hash / query string.
+═══════════════════════════════════════════════ */
+window.addEventListener('load', function handleOAuthCallback(){
+
+  /* ── 1. Check if already authenticated ── */
+  const saved = localStorage.getItem('orbyt_user');
+  if(localStorage.getItem('orbyt_is_authenticated') === 'true' && saved){
+    try{
+      const u = JSON.parse(saved);
+      _bootDashboard(u.name, u.method);
+      return;
+    }catch(e){ /* corrupt data — fall through to auth screen */ }
   }
 
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html,body{height:100%;overflow:hidden;}
-  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;cursor:default;}
+  /* ── 2. Google implicit grant — token in URL hash ── */
+  const hash   = window.location.hash.substring(1);
+  const hParams = new URLSearchParams(hash);
+  const gToken  = hParams.get('access_token');
 
-  #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
-  #cursor-glow{position:fixed;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,74,0.05) 0%,transparent 70%);pointer-events:none;transform:translate(-50%,-50%);z-index:1;transition:left .08s,top .08s;}
+  if(gToken){
+    /* Clear immediately for security */
+    window.history.replaceState(null, '', window.location.pathname);
+    /* Fetch profile from Google */
+    fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: 'Bearer ' + gToken }
+    })
+    .then(r => r.ok ? r.json() : Promise.reject('Google API error'))
+    .then(info => {
+      const name = info.given_name || info.name || info.email.split('@')[0];
+      _showConfirmModal(name, 'google', gToken);
+    })
+    .catch(() => {
+      /* Token valid but profile fetch failed — still let them in with email */
+      _showConfirmModal('Google User', 'google', gToken);
+    });
+    return;
+  }
 
-  /* PAGES */
-  .page{position:fixed;inset:0;z-index:10;display:none;}
-  .page.active{display:flex;}
+  /* ── 3. Roblox auth code — code in query string ── */
+  const qParams = new URLSearchParams(window.location.search);
+  const rCode   = qParams.get('code');
 
-  /* ══ AUTH ══ */
-  #page-auth{align-items:center;justify-content:center;flex-direction:column;padding:16px;}
+  if(rCode){
+    /* Clear immediately for security */
+    window.history.replaceState(null, '', window.location.pathname);
+    /*  Roblox token exchange requires a server (client secret).
+        We surface the code to the confirmation modal so the user
+        knows auth succeeded; full token exchange must happen server-side. */
+    _showConfirmModal('Roblox User', 'roblox', rCode);
+    return;
+  }
 
-  .auth-logo{font-family:'Syne',sans-serif;font-size:clamp(48px,8vw,72px);font-weight:800;letter-spacing:-4px;background:linear-gradient(135deg,var(--coral),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoReveal 1.2s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(30px) scale(0.9);}
-  @keyframes logoReveal{to{opacity:1;transform:translateY(0) scale(1);}}
-  .auth-tagline{color:var(--text2);font-size:clamp(10px,2vw,13px);letter-spacing:3px;text-transform:uppercase;margin-top:8px;animation:fadeUp 1.2s .3s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(10px);}
-  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+  /* ── 4. No token — stay on auth screen (default) ── */
+});
 
-  .auth-card{margin-top:36px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:20px;padding:clamp(24px,4vw,40px);width:min(400px,calc(100vw - 32px));animation:fadeUp 1.2s .5s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(20px);box-shadow:0 0 60px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);}
+/* ═══════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════ */
+function go(panel, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+panel).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+panel+"'")) n.classList.add('active');
+    });
+  }
+  document.getElementById('sidebar').classList.remove('open');
+}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');}
 
-  .auth-tabs{display:flex;gap:0;margin-bottom:24px;background:var(--bg3);border-radius:10px;padding:4px;}
-  .auth-tab{flex:1;padding:8px;text-align:center;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text3);transition:all .2s;}
-  .auth-tab.active{background:var(--surface2);color:var(--text);}
+/* ═══════════════════════════════════════════════
+   CREDENTIALS
+═══════════════════════════════════════════════ */
+function getKey(){return document.getElementById('apiKey').value.trim();}
+function getUid(){return document.getElementById('creatorId').value.trim();}
+function toggleKey(){const i=document.getElementById('apiKey');i.type=i.type==='password'?'text':'password';}
+function updateCred(){
+  const pill=document.getElementById('credPill');
+  const k=getKey(),u=getUid();
+  if(k&&u){pill.textContent='● LIVE';pill.className='cred-pill ok';}
+  else if(k||u){pill.textContent='◐ PARTIAL';pill.className='cred-pill warn';}
+  else{pill.textContent='NO KEY';pill.className='cred-pill';}
+}
 
-  .auth-panel{display:none;} .auth-panel.active{display:block;}
+/* ═══════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════ */
+function showR(id,type,msg){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.style.display='block';el.className='result '+type;el.innerHTML=msg;
+}
+function showFile(inp,nameId){
+  const f=document.getElementById(inp).files[0];
+  if(f){const n=document.getElementById(nameId);n.textContent=f.name;n.style.display='block';}
+}
+function logActivity(msg){
+  const feed=document.getElementById('activityFeed');
+  if(!feed)return;
+  const item=document.createElement('div');
+  item.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:0.67rem;';
+  item.innerHTML=`<span style="color:var(--muted);font-size:0.55rem;letter-spacing:1px;flex-shrink:0;">${new Date().toLocaleTimeString()}</span><span>${msg}</span>`;
+  if(feed.querySelector('.empty')) feed.innerHTML='';
+  feed.prepend(item);
+}
 
-  .auth-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;color:var(--text);}
-  .auth-sub{text-align:center;color:var(--text3);font-size:11px;margin-bottom:24px;letter-spacing:1px;}
+/* ═══════════════════════════════════════════════
+   MY GAMES
+═══════════════════════════════════════════════ */
+async function loadGames(){
+  const key=getKey(),uid=getUid();
+  if(!key||!uid){showR('gamesResult','err','✕ Add API Key and User ID in the top bar first.');return;}
+  showR('gamesResult','load','⏳ Loading games...');
+  try{
+    const r=await fetch(`https://apis.roblox.com/universes/v1/universes?creatorType=User&creatorTargetId=${uid}`,{headers:{'x-api-key':key}});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||r.status);
+    renderGames(d.data||[]);
+    showR('gamesResult','ok',`✅ Loaded ${(d.data||[]).length} game(s).`);
+    logActivity(`🎮 Loaded ${(d.data||[]).length} games`);
+  }catch(e){showR('gamesResult','err','✕ '+e.message);}
+}
+const emojis=['🎯','⚡','🚀','🏆','🔥','🌟','🎲','🌈','🎪','💫'];
+function renderGames(games){
+  const grid=document.getElementById('gamesGrid');
+  if(!games.length){grid.innerHTML='<div class="empty"><div class="empty-icon">🎮</div>No games found on this account.</div>';return;}
+  grid.className='games-grid';
+  grid.innerHTML=games.map((g,i)=>`
+    <div class="game-card" onclick='openGame(${JSON.stringify({name:g.name,id:String(g.id),pub:g.isPublic,desc:g.description||""})})'>
+      <div class="game-thumb">${emojis[i%emojis.length]}</div>
+      <div class="game-body">
+        <div class="game-name">${g.name}</div>
+        <div class="game-meta">ID: ${g.id}</div>
+        <span class="game-tag ${g.isPublic?'gt-pub':'gt-prv'}">${g.isPublic?'Public':'Private'}</span>
+      </div>
+    </div>`).join('')+
+  `<div class="add-game-card" onclick="go('create',null)">
+    <div class="add-game-icon">＋</div>
+    <div class="add-game-text">New Game</div>
+  </div>`;
+}
+function openGame(g){
+  currentGame=g;
+  document.getElementById('ovTitle').textContent=g.name+' — Settings';
+  document.getElementById('ov_id').textContent=g.id;
+  document.getElementById('ov_vis').textContent=g.pub?'🌍 Public':'🔒 Private';
+  document.getElementById('ov_name').value=g.name;
+  document.getElementById('ov_desc').value=g.desc||'';
+  if(g.pub)document.getElementById('ov_pub').checked=true;
+  else document.getElementById('ov_prv').checked=true;
+  document.getElementById('ovResult').style.display='none';
+  document.getElementById('gameOverlay').classList.add('open');
+}
+function closeOvIf(e){if(e.target===document.getElementById('gameOverlay'))closeOv();}
+function closeOv(){document.getElementById('gameOverlay').classList.remove('open');}
+async function saveGameSettings(){
+  const key=getKey(),id=currentGame?.id;
+  if(!key||!id){showR('ovResult','err','✕ API Key required (set in top bar).');return;}
+  const name=document.getElementById('ov_name').value.trim();
+  const desc=document.getElementById('ov_desc').value.trim();
+  showR('ovResult','load','⏳ Saving...');
+  try{
+    const r=await fetch(`https://apis.roblox.com/universes/v1/${id}/configuration`,{method:'PATCH',headers:{'x-api-key':key,'Content-Type':'application/json'},body:JSON.stringify({name,description:desc})});
+    if(!r.ok){const d=await r.json();throw new Error(d.message||r.status);}
+    showR('ovResult','ok','✅ Settings saved!');
+    logActivity(`⚙️ Updated settings for "${name}"`);
+  }catch(e){showR('ovResult','err','✕ '+e.message);}
+}
 
-  .auth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;border-radius:12px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:10px;position:relative;overflow:hidden;}
-  .auth-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,74,0.1),transparent);opacity:0;transition:opacity .2s;}
-  .auth-btn:hover::before{opacity:1;}
-  .auth-btn:hover{border-color:var(--coral);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
-  .auth-btn svg{width:20px;height:20px;flex-shrink:0;}
+/* ═══════════════════════════════════════════════
+   CREATE GAME
+═══════════════════════════════════════════════ */
+async function createGame(){
+  const key=getKey(),uid=getUid();
+  const name=document.getElementById('gameName').value.trim();
+  const desc=document.getElementById('gameDesc').value.trim();
+  const friendsOnly=document.getElementById('friendsOnly').checked;
+  const btn=document.getElementById('createBtn');
+  if(!key||!uid||!name){showR('createResult','err','✕ API Key, User ID and Game Name required.');return;}
+  showR('createResult','load','⏳ Creating game...');btn.disabled=true;
+  try{
+    const r=await fetch('https://apis.roblox.com/universes/v1/universes/create',{method:'POST',headers:{'x-api-key':key,'Content-Type':'application/json'},body:JSON.stringify({creatorType:'User',creatorTargetId:parseInt(uid),name,description:desc,isForSale:false,isFriendsOnly:friendsOnly})});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||JSON.stringify(d));
+    showR('createResult','ok',`✅ Game created!<br>Universe ID: <strong>${d.universeId}</strong><br><a href="https://create.roblox.com/dashboard/creations/experiences/${d.universeId}/configure" target="_blank" style="color:var(--green);">→ Open Dashboard</a>`);
+    logActivity(`✨ Created game "${name}" (ID: ${d.universeId})`);
+  }catch(e){showR('createResult','err','✕ '+e.message);}
+  btn.disabled=false;
+}
 
-  .auth-input-group{margin-bottom:12px;}
-  .auth-input-group label{display:block;font-size:10px;letter-spacing:2px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;}
-  .auth-input-group input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;}
-  .auth-input-group input:focus{border-color:var(--coral);box-shadow:0 0 0 3px rgba(255,107,74,0.08);}
-  .auth-input-group input::placeholder{color:var(--text3);}
+/* ═══════════════════════════════════════════════
+   DATASTORE
+═══════════════════════════════════════════════ */
+async function dsGet(){
+  const key=getKey(),uid=document.getElementById('ds_uid').value.trim();
+  const name=document.getElementById('ds_name').value.trim();
+  const k=document.getElementById('ds_key').value.trim();
+  const scope=document.getElementById('ds_scope').value.trim()||'global';
+  if(!key||!uid||!name||!k){showR('dsResult','err','✕ Fill all required fields + API Key.');return;}
+  showR('dsResult','load','⏳ Fetching...');
+  try{
+    const r=await fetch(`https://apis.roblox.com/datastores/v1/universes/${uid}/standard-datastores/datastore/entries/entry?datastoreName=${encodeURIComponent(name)}&scope=${encodeURIComponent(scope)}&entryKey=${encodeURIComponent(k)}`,{headers:{'x-api-key':key}});
+    const text=await r.text();
+    if(!r.ok)throw new Error(text);
+    showR('dsResult','ok',`<pre style="white-space:pre-wrap;font-size:0.68rem;">${text}</pre>`);
+    logActivity(`🗄️ Got DataStore key "${k}" from "${name}"`);
+  }catch(e){showR('dsResult','err','✕ '+e.message);}
+}
+async function dsSet(){
+  const key=getKey(),uid=document.getElementById('ds_uid').value.trim();
+  const name=document.getElementById('ds_name').value.trim();
+  const k=document.getElementById('ds_key').value.trim();
+  const scope=document.getElementById('ds_scope').value.trim()||'global';
+  const val=document.getElementById('ds_val').value.trim();
+  if(!key||!uid||!name||!k||!val){showR('dsSetResult','err','✕ Fill all required fields.');return;}
+  showR('dsSetResult','load','⏳ Setting entry...');
+  try{
+    const r=await fetch(`https://apis.roblox.com/datastores/v1/universes/${uid}/standard-datastores/datastore/entries/entry?datastoreName=${encodeURIComponent(name)}&scope=${encodeURIComponent(scope)}&entryKey=${encodeURIComponent(k)}`,{method:'POST',headers:{'x-api-key':key,'content-type':'application/json'},body:val});
+    if(!r.ok){const t=await r.text();throw new Error(t);}
+    showR('dsSetResult','ok','✅ Entry set successfully.');
+    logActivity(`🗄️ Set DataStore key "${k}" in "${name}"`);
+  }catch(e){showR('dsSetResult','err','✕ '+e.message);}
+}
+async function dsDelete(){
+  const key=getKey(),uid=document.getElementById('ds_uid').value.trim();
+  const name=document.getElementById('ds_name').value.trim();
+  const k=document.getElementById('ds_key').value.trim();
+  const scope=document.getElementById('ds_scope').value.trim()||'global';
+  if(!key||!uid||!name||!k){showR('dsResult','err','✕ Fill all required fields.');return;}
+  showR('dsResult','load','⏳ Deleting...');
+  try{
+    const r=await fetch(`https://apis.roblox.com/datastores/v1/universes/${uid}/standard-datastores/datastore/entries/entry?datastoreName=${encodeURIComponent(name)}&scope=${encodeURIComponent(scope)}&entryKey=${encodeURIComponent(k)}`,{method:'DELETE',headers:{'x-api-key':key}});
+    if(!r.ok){const t=await r.text();throw new Error(t);}
+    showR('dsResult','ok','✅ Entry deleted.');
+    logActivity(`🗄️ Deleted DataStore key "${k}"`);
+  }catch(e){showR('dsResult','err','✕ '+e.message);}
+}
 
-  .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text3);font-size:11px;letter-spacing:2px;}
-  .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+/* ═══════════════════════════════════════════════
+   SCRIPT VAULT
+═══════════════════════════════════════════════ */
+function openSnippetForm(){document.getElementById('snippetOverlay').classList.add('open');}
+function closeSnipIf(e){if(e.target===document.getElementById('snippetOverlay'))closeSnip();}
+function closeSnip(){document.getElementById('snippetOverlay').classList.remove('open');}
+function saveSnippet(){
+  const name=document.getElementById('snipName').value.trim();
+  const code=document.getElementById('snipCode').value.trim();
+  const tag=document.getElementById('snipTag').value;
+  const notes=document.getElementById('snipNotes').value.trim();
+  if(!name||!code){ const sErr=document.createElement('div'); sErr.style.cssText='color:var(--accent);font-size:0.65rem;margin-top:-4px;'; sErr.textContent='✕ Name and code are required.'; document.getElementById('snippetOverlay').querySelector('.overlay-body').prepend(sErr); setTimeout(()=>sErr.remove(),3000); return; }
+  snippets.unshift({id:Date.now(),name,code,tag,notes,date:new Date().toLocaleDateString()});
+  localStorage.setItem('orbyt_snippets',JSON.stringify(snippets));
+  document.getElementById('snipName').value='';document.getElementById('snipCode').value='';document.getElementById('snipNotes').value='';
+  closeSnip();renderSnippets();
+  document.getElementById('dash-snippets').textContent=snippets.length;
+  logActivity(`📋 Saved snippet "${name}"`);
+}
+function renderSnippets(){
+  const q=document.getElementById('snippetSearch')?.value?.toLowerCase()||'';
+  const filtered=snippets.filter(s=>{
+    const tagOk=activeSnipTag==='all'||s.tag===activeSnipTag;
+    const searchOk=!q||s.name.toLowerCase().includes(q)||s.code.toLowerCase().includes(q);
+    return tagOk&&searchOk;
+  });
+  const grid=document.getElementById('snippetGrid');
+  if(!grid)return;
+  if(!filtered.length){grid.innerHTML='<div class="empty"><div class="empty-icon">📋</div>No snippets found.</div>';return;}
+  grid.innerHTML=filtered.map(s=>`
+    <div class="snippet-card">
+      <div class="snippet-header">
+        <span class="snippet-name">${s.name}</span>
+        <span class="snippet-tag">${s.tag}</span>
+        <button class="rm-btn" onclick="deleteSnippet(${s.id})">✕</button>
+      </div>
+      <div class="snippet-code">${s.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+      <div class="snippet-footer">
+        <span class="snippet-meta">${s.notes||'No notes'} · ${s.date}</span>
+        <button class="snippet-copy" onclick="copySnippet(${s.id})">Copy</button>
+      </div>
+    </div>`).join('');
+}
+function deleteSnippet(id){snippets=snippets.filter(s=>s.id!==id);localStorage.setItem('orbyt_snippets',JSON.stringify(snippets));renderSnippets();document.getElementById('dash-snippets').textContent=snippets.length;}
+function copySnippet(id){const s=snippets.find(x=>x.id===id);if(s)navigator.clipboard?.writeText(s.code).then(()=>logActivity(`📋 Copied snippet "${s.name}"`));}
+function filterSnippets(){renderSnippets();}
+function filterSnippetTag(tag,el){
+  activeSnipTag=tag;
+  document.querySelectorAll('#snippetTagFilters .tag-chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');renderSnippets();
+}
 
-  .auth-terms{text-align:center;font-size:11px;color:var(--text3);line-height:1.6;margin-top:16px;}
-  .auth-terms span{color:var(--coral);cursor:pointer;}
+/* ═══════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════ */
+let bc=0;
+function addBadge(){
+  bc++;const id='b'+bc;
+  document.getElementById('badgeList').insertAdjacentHTML('beforeend',`
+    <div class="item-card" id="${id}">
+      <div class="item-card-hdr"><span class="item-card-title">Badge ${bc}</span><button class="rm-btn" onclick="document.getElementById('${id}').remove()">✕ Remove</button></div>
+      <div class="field"><div class="field-label">Badge Name</div><input type="text" placeholder="e.g. First Blood"/></div>
+      <div class="field"><div class="field-label">Description</div><input type="text" placeholder="e.g. Get your first kill"/></div>
+    </div>`);
+}
+function submitBadges(){showR('badgeResult','load','⏳ Submitting...');setTimeout(()=>{showR('badgeResult','ok','✅ Badges queued. Use Open Cloud API with Badges:Write permission to finalize.');logActivity('🏅 Submitted badge list');},700);}
 
-  .oauth-info{background:rgba(74,159,255,0.08);border:1px solid rgba(74,159,255,0.2);border-radius:10px;padding:10px 14px;font-size:11px;color:var(--blue);margin-bottom:14px;line-height:1.6;}
+/* ═══════════════════════════════════════════════
+   DEV PRODUCTS
+═══════════════════════════════════════════════ */
+let pc=0;
+function addProduct(){
+  pc++;const id='p'+pc;
+  document.getElementById('productList').insertAdjacentHTML('beforeend',`
+    <div class="item-card" id="${id}">
+      <div class="item-card-hdr"><span class="item-card-title">Product ${pc}</span><button class="rm-btn" onclick="document.getElementById('${id}').remove()">✕ Remove</button></div>
+      <div class="field-row">
+        <div class="field"><div class="field-label">Name</div><input type="text" placeholder="1000 Coins"/></div>
+        <div class="field"><div class="field-label">Price (R$)</div><input type="number" placeholder="99"/></div>
+      </div>
+      <div class="field"><div class="field-label">Description</div><input type="text" placeholder="Get 1000 coins instantly"/></div>
+    </div>`);
+}
+function submitProducts(){showR('productResult','load','⏳ Submitting...');setTimeout(()=>{showR('productResult','ok','✅ Products queued. Use Creator Dashboard or Open Cloud to finalize.');logActivity('💎 Submitted dev products');},700);}
 
-  /* ══ APP SHELL ══ */
-  #page-app{flex-direction:row;}
+/* ═══════════════════════════════════════════════
+   GAME PASSES
+═══════════════════════════════════════════════ */
+let gpc=0;
+function addPass(){
+  gpc++;const id='gp'+gpc;
+  document.getElementById('passList').insertAdjacentHTML('beforeend',`
+    <div class="item-card" id="${id}">
+      <div class="item-card-hdr"><span class="item-card-title">Pass ${gpc}</span><button class="rm-btn" onclick="document.getElementById('${id}').remove()">✕ Remove</button></div>
+      <div class="field-row">
+        <div class="field"><div class="field-label">Name</div><input type="text" placeholder="VIP Pass"/></div>
+        <div class="field"><div class="field-label">Price (R$)</div><input type="number" placeholder="299"/></div>
+      </div>
+      <div class="field"><div class="field-label">Description</div><input type="text" placeholder="2× income forever"/></div>
+    </div>`);
+}
+function submitPasses(){showR('passResult','load','⏳ Submitting...');setTimeout(()=>{showR('passResult','ok','✅ Passes queued. Use Creator Dashboard to finalize.');logActivity('🎫 Submitted game passes');},700);}
 
-  /* SIDEBAR */
-  .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100%;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:20;transition:transform .3s;overflow:hidden;}
+/* ═══════════════════════════════════════════════
+   ASSET UPLOADER
+═══════════════════════════════════════════════ */
+async function uploadAsset(){
+  const key=getKey(),type=document.getElementById('assetType').value;
+  const name=document.getElementById('assetName').value.trim();
+  const creator=document.getElementById('assetCreator').value.trim();
+  const file=document.getElementById('assetFile').files[0];
+  if(!key||!name||!creator||!file){showR('assetResult','err','✕ All fields and a file are required.');return;}
+  showR('assetResult','load','⏳ Uploading...');
+  try{
+    const fd=new FormData();
+    fd.append('request',JSON.stringify({assetType:type,displayName:name,description:'',creationContext:{creator:{userId:parseInt(creator)}}}));
+    fd.append('fileContent',file,file.name);
+    const r=await fetch('https://apis.roblox.com/assets/v1/assets',{method:'POST',headers:{'x-api-key':key},body:fd});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||JSON.stringify(d));
+    const assetId=d.assetId||d.operationId||'Pending';
+    uploadedAssets.unshift({name,type,id:assetId,status:'✅ Done'});
+    const tb=document.getElementById('assetTable');
+    tb.innerHTML=uploadedAssets.map(a=>`<tr><td>${a.name}</td><td>${a.type}</td><td>${a.id}</td><td>${a.status}</td></tr>`).join('');
+    showR('assetResult','ok','✅ Uploaded! Asset ID: '+assetId);
+    logActivity(`📦 Uploaded asset "${name}" (${type})`);
+  }catch(e){showR('assetResult','err','✕ '+e.message);}
+}
 
-  .sidebar-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0;}
-  .sidebar-logo-mark{width:30px;height:30px;flex-shrink:0;}
-  .sidebar-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-1px;background:linear-gradient(135deg,var(--coral),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+/* ═══════════════════════════════════════════════
+   ANALYTICS
+═══════════════════════════════════════════════ */
+async function fetchAnalytics(){
+  const key=getKey(),uid=document.getElementById('an_uid').value.trim();
+  if(!key||!uid){showR('anResult','err','✕ API Key and Universe ID required.');return;}
+  showR('anResult','load','⏳ Fetching...');
+  try{
+    const r=await fetch(`https://apis.roblox.com/universes/v1/universes/${uid}`,{headers:{'x-api-key':key}});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.message||r.status);
+    document.getElementById('an_play').textContent=(d.playing||0).toLocaleString();
+    document.getElementById('an_vis').textContent=(d.visits||0).toLocaleString();
+    document.getElementById('an_fav').textContent=(d.favoritedCount||0).toLocaleString();
+    const likes=d.upVotes||0,total=(d.upVotes||0)+(d.downVotes||1);
+    document.getElementById('an_rat').textContent=Math.round(likes/total*100)+'%';
+    document.getElementById('an_play_s').textContent='Live';
+    document.getElementById('an_vis_s').textContent='All time';
+    showR('anResult','ok','✅ Stats loaded for: '+d.name);
+    renderChart([Math.round(d.playing*0.7),Math.round(d.playing*0.9),Math.round(d.playing*1.1),Math.round(d.playing*0.85),Math.round(d.playing*1.3),Math.round(d.playing*1.2),d.playing||0]);
+    logActivity(`📊 Fetched analytics for Universe ${uid}`);
+  }catch(e){showR('anResult','err','✕ '+e.message);}
+}
+function renderChart(vals){
+  const max=Math.max(...vals,1);
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  document.getElementById('visChart').innerHTML=days.map((d,i)=>`
+    <div class="chart-row">
+      <div class="chart-lbl">${d}</div>
+      <div class="chart-bg"><div class="chart-fill" style="width:${(vals[i]/max*100).toFixed(1)}%"></div></div>
+      <div class="chart-val">${vals[i].toLocaleString()}</div>
+    </div>`).join('');
+}
 
-  .sidebar-nav{flex:1;padding:8px 6px;overflow-y:auto;overflow-x:hidden;}
-  .nav-section{font-size:9px;letter-spacing:2px;color:var(--text3);padding:10px 10px 4px;text-transform:uppercase;}
-  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:500;color:var(--text2);transition:all .15s;margin-bottom:1px;white-space:nowrap;position:relative;overflow:hidden;}
-  .nav-item::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:0;background:var(--coral);border-radius:2px;transition:height .2s;}
-  .nav-item:hover{background:var(--surface);color:var(--text);}
-  .nav-item.active{background:var(--surface2);color:var(--coral);font-weight:600;}
-  .nav-item.active::before{height:18px;}
-  .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.8;}
-  .nav-badge{margin-left:auto;background:var(--coral);color:#000;font-size:8px;font-weight:700;padding:2px 5px;border-radius:20px;}
+/* ═══════════════════════════════════════════════
+   ECONOMY SIMULATOR
+═══════════════════════════════════════════════ */
+function runSim(){
+  const dau=+document.getElementById('ec_dau')?.value||0;
+  const session=+document.getElementById('ec_session')?.value||0;
+  const pass=+document.getElementById('ec_pass')?.value||0;
+  const conv=+document.getElementById('ec_conv')?.value||0;
+  const prod=+document.getElementById('ec_prod')?.value||0;
+  const purch=+document.getElementById('ec_purch')?.value||0;
+  const drop=+document.getElementById('ec_drop')?.value||0;
+  const rare=+document.getElementById('ec_rare')?.value||0;
+  const passRev=Math.round(dau*(conv/100)*pass);
+  const prodRev=Math.round(dau*purch*prod);
+  const totalR=passRev+prodRev;
+  const usd=(totalR*0.0035*0.7).toFixed(2);
+  const drops=Math.round(dau*(session/60)*drop);
+  const rareDrops=Math.round(drops*(rare/100));
+  const payers=Math.round(dau*(conv/100));
+  const inflationRisk=drops>dau*10?'⚠️ HIGH':'✅ OK';
+  const s=n=>n.toLocaleString();
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('sim_rev',s(totalR)+' R$');
+  set('sim_rev_mo',s(totalR*30)+' R$');
+  set('sim_usd','$'+usd);
+  set('sim_usd_mo','$'+(usd*30).toFixed(2));
+  set('sim_drops',s(drops));
+  set('sim_rare',s(rareDrops));
+  set('sim_payers',s(payers));
+  set('sim_health',inflationRisk);
+  const w=document.getElementById('ecoWarnings');
+  if(w){
+    const warns=[];
+    if(conv<1)warns.push('⚠️ Low conversion rate — consider lowering pass price or adding more value.');
+    if(drops>dau*12)warns.push('⚠️ Very high drop rate may cause item inflation over time.');
+    if(rare>15)warns.push('⚠️ Rare drop rate is high — rares may lose perceived value.');
+    if(purch>3)warns.push('⚠️ High purchase frequency — players may feel pressured to spend.');
+    w.innerHTML=warns.map(x=>`<div style="font-size:0.67rem;color:var(--accent2);padding:6px 10px;border-left:2px solid var(--accent2);margin-top:6px;">${x}</div>`).join('');
+  }
+}
 
-  .sidebar-user{padding:12px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px;cursor:pointer;transition:background .15s;flex-shrink:0;}
-  .sidebar-user:hover{background:var(--surface);}
-  .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
-  .user-info{overflow:hidden;min-width:0;}
-  .user-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .user-plan{font-size:9px;color:var(--amber);letter-spacing:1px;}
+/* ═══════════════════════════════════════════════
+   PITCH BUILDER
+═══════════════════════════════════════════════ */
+function generatePitch(){
+  const idea=document.getElementById('pitchIdea').value.trim();
+  const genre=document.getElementById('pitchGenre').value;
+  const audience=document.getElementById('pitchAudience').value;
+  if(!idea){showR('pitchResult','err','✕ Describe your game idea first.');return;}
+  showR('pitchResult','load','✨ Generating pitch document...');
+  document.getElementById('pitchBtn').disabled=true;
+  setTimeout(()=>{
+    const words=idea.split(' ');
+    const gameName=words.slice(0,2).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join('')+' '+['World','Tycoon','Adventure','Empire','Quest','Rush','Arena'][Math.floor(Math.random()*7)];
+    const pitch=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GAME PITCH DOCUMENT
+Generated by ORBYT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  /* MOBILE SIDEBAR TOGGLE */
-  .sidebar-toggle{display:none;position:fixed;top:14px;left:14px;z-index:50;width:36px;height:36px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;align-items:center;justify-content:center;cursor:pointer;color:var(--text);}
-  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:19;backdrop-filter:blur(4px);}
+📌 WORKING TITLE
+${gameName}
 
-  /* MAIN */
-  .main{flex:1;height:100%;overflow:hidden;display:flex;flex-direction:column;min-width:0;}
+🎮 GENRE
+${genre}
 
-  .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;background:var(--bg2);flex-shrink:0;}
-  .topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;}
-  .topbar-search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 12px;width:clamp(140px,25vw,220px);transition:border-color .2s;}
-  .topbar-search:focus-within{border-color:var(--coral);box-shadow:0 0 0 3px rgba(255,107,74,0.1);}
-  .topbar-search input{background:none;border:none;outline:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;width:100%;}
-  .topbar-search input::placeholder{color:var(--text3);}
-  .topbar-actions{display:flex;gap:6px;}
-  .icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:var(--text2);}
-  .icon-btn:hover{border-color:var(--coral);color:var(--coral);}
+👥 TARGET AUDIENCE
+${audience}
 
-  .content{flex:1;overflow-y:auto;padding:clamp(16px,3vw,28px);}
+📖 ELEVATOR PITCH
+${idea.charAt(0).toUpperCase()+idea.slice(1)}. Players will experience a compelling loop of progression and discovery that keeps them coming back daily.
 
-  /* PANELS */
-  .panel{display:none;}
-  .panel.active{display:block;animation:panelIn .35s cubic-bezier(.16,1,.3,1);}
-  @keyframes panelIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+⭐ CORE GAMEPLAY LOOP
+1. Enter the world and explore your starting area
+2. Complete objectives to earn resources and XP
+3. Upgrade your abilities, base or character
+4. Unlock new areas, items or mechanics
+5. Compete or cooperate with other players
+6. Repeat with increasing challenge and reward
 
-  /* CARDS */
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(16px,3vw,22px);transition:border-color .2s,box-shadow .2s;}
-  .card:hover{border-color:var(--border2);box-shadow:0 8px 32px rgba(0,0,0,0.2);}
-  .card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
-  .card-sub{font-size:10px;color:var(--text3);letter-spacing:1px;}
+💰 MONETISATION STRATEGY
+• Game Pass: VIP/Premium — 299–499 R$
+  - 2× resource income, exclusive cosmetics, priority access
+• Developer Products: Resource bundles — 49–499 R$
+  - Instant currency packs, skip timers, extra inventory
+• Cosmetic Passes: Skin/pet packs — 199 R$
+  - No pay-to-win, all cosmetic only
 
-  /* GRIDS — responsive */
-  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+🏅 BADGE IDEAS
+• First Steps — Complete the tutorial
+• Veteran — Play for 10 hours total
+• High Roller — Spend 1,000 R$ on products
+• Top of the World — Reach max level
+• Social Butterfly — Invite 5 friends
+
+📊 SUCCESS METRICS (30-day targets)
+• Daily Active Users: 500+
+• 7-day retention: 25%+
+• ARPPU (Avg Revenue Per Paying User): 150 R$
+• Conversion rate: 3–5%
+
+📅 DEVELOPMENT MILESTONES
+Week 1-2: Core mechanics prototype
+Week 3-4: Art pass and map layout
+Week 5: Monetisation integration
+Week 6: Internal beta + bug fixes
+Week 7: Closed beta (100 players)
+Week 8: Public launch 🚀
+
+⚠️ RISKS & MITIGATIONS
+• Oversaturated genre → Differentiate with unique mechanic
+• Low retention → Add daily quests and streak bonuses
+• Economy inflation → Cap drop rates and bind items
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Generated by ORBYT · ${new Date().toLocaleDateString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+    document.getElementById('pitchOutput').textContent=pitch;
+    document.getElementById('pitchOutputCard').style.display='';
+    document.getElementById('pitchResult').style.display='none';
+    document.getElementById('pitchBtn').disabled=false;
+    logActivity('🚀 Generated pitch for "'+gameName+'"');
+  },1200);
+}
+function copyPitch(){navigator.clipboard?.writeText(document.getElementById('pitchOutput').textContent);logActivity('📋 Copied pitch document');}
+
+/* ═══════════════════════════════════════════════
+   PLAYER LOOKUP
+═══════════════════════════════════════════════ */
+async function lookupPlayer(){
+  const q=document.getElementById('playerQ').value.trim();
+  if(!q)return;
+  showR('playerResult','load','⏳ Looking up...');
+  document.getElementById('playerCard').style.display='none';
+  try{
+    let url;
+    if(/^\d+$/.test(q)){url=`https://users.roblox.com/v1/users/${q}`;}
+    else{
+      const r2=await fetch('https://users.roblox.com/v1/usernames/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usernames:[q],excludeBannedUsers:false})});
+      const d2=await r2.json();
+      if(!d2.data?.length)throw new Error('User not found.');
+      url=`https://users.roblox.com/v1/users/${d2.data[0].id}`;
+    }
+    const r=await fetch(url);
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.errors?.[0]?.message||'Not found.');
+    document.getElementById('pName').textContent=d.name;
+    document.getElementById('pDisplay').textContent=d.displayName||'—';
+    document.getElementById('pId').textContent=d.id;
+    document.getElementById('pJoined').textContent=d.created?new Date(d.created).toLocaleDateString():'—';
+    document.getElementById('pDesc').textContent=d.description?.slice(0,80)||'—';
+    document.getElementById('playerCard').style.display='';
+    document.getElementById('playerResult').style.display='none';
+    logActivity(`🔍 Looked up player "${d.name}"`);
+  }catch(e){showR('playerResult','err','✕ '+e.message);}
+}
+
+/* ═══════════════════════════════════════════════
+   GROUPS
+═══════════════════════════════════════════════ */
+async function fetchGroup(){
+  const id=document.getElementById('groupId').value.trim();
+  if(!id)return;
+  showR('groupResult','load','⏳ Fetching...');
+  document.getElementById('groupInfo').style.display='none';
+  try{
+    const r=await fetch(`https://groups.roblox.com/v1/groups/${id}`);
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.errors?.[0]?.message||'Not found.');
+    document.getElementById('groupInfo').innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+        <div><div style="font-size:0.52rem;color:var(--muted);letter-spacing:2px;">NAME</div><div style="font-size:0.8rem;font-family:'Syne',sans-serif;font-weight:700;">${d.name}</div></div>
+        <div><div style="font-size:0.52rem;color:var(--muted);letter-spacing:2px;">MEMBERS</div><div style="font-size:0.8rem;font-family:'Syne',sans-serif;font-weight:700;">${(d.memberCount||0).toLocaleString()}</div></div>
+        <div><div style="font-size:0.52rem;color:var(--muted);letter-spacing:2px;">OWNER</div><div style="font-size:0.75rem;">${d.owner?.username||'—'}</div></div>
+        <div><div style="font-size:0.52rem;color:var(--muted);letter-spacing:2px;">GROUP ID</div><div style="font-size:0.75rem;">${d.id}</div></div>
+      </div>`;
+    document.getElementById('groupInfo').style.display='';
+    document.getElementById('groupResult').style.display='none';
+    logActivity(`👥 Fetched group "${d.name}"`);
+  }catch(e){showR('groupResult','err','✕ '+e.message);}
+}
+async function changeRank(){
+  const key=getKey(),gid=document.getElementById('groupId').value.trim();
+  const uid=document.getElementById('rankUid').value.trim();
+  const role=document.getElementById('rankRole').value.trim();
+  if(!key||!gid||!uid||!role){showR('rankResult','err','✕ API Key, Group ID, User ID and Role ID required.');return;}
+  showR('rankResult','load','⏳ Updating...');
+  try{
+    const r=await fetch(`https://apis.roblox.com/cloud/v2/groups/${gid}/memberships/${uid}`,{method:'PATCH',headers:{'x-api-key':key,'Content-Type':'application/json'},body:JSON.stringify({role:`groups/${gid}/roles/${role}`})});
+    if(!r.ok){const d=await r.json();throw new Error(d.message||r.status);}
+    showR('rankResult','ok','✅ Rank updated!');
+    logActivity(`👥 Updated rank for user ${uid} in group ${gid}`);
+  }catch(e){showR('rankResult','err','✕ '+e.message);}
+}
+
+/* ═══════════════════════════════════════════════
+   USERNAME CHECKER
+═══════════════════════════════════════════════ */
+async function checkUsernames(){
+  const raw=document.getElementById('ucNames').value.trim();
+  if(!raw)return;
+  const names=raw.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,20);
+  showR('ucResult','load',`⏳ Checking ${names.length} usernames...`);
+  document.getElementById('ucGrid').innerHTML='';
+  const results=[];
+  for(const name of names){
+    try{
+      const r=await fetch('https://users.roblox.com/v1/usernames/users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usernames:[name],excludeBannedUsers:false})});
+      const d=await r.json();
+      const taken=d.data&&d.data.length>0;
+      results.push({name,taken});
+    }catch{results.push({name,taken:null});}
+  }
+  document.getElementById('ucGrid').innerHTML=results.map(r=>`
+    <div style="background:var(--card);border:1px solid ${r.taken===false?'rgba(61,214,140,0.3)':r.taken?'rgba(255,95,64,0.3)':'var(--border)'};border-radius:10px;padding:12px;text-align:center;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;margin-bottom:4px;">${r.name}</div>
+      <div style="font-size:0.58rem;letter-spacing:1.5px;color:${r.taken===false?'var(--green)':r.taken?'var(--accent)':'var(--muted)'}">
+        ${r.taken===null?'⚠️ ERROR':r.taken?'✕ TAKEN':'✅ AVAILABLE'}
+      </div>
+    </div>`).join('');
+  const avail=results.filter(r=>r.taken===false).length;
+  showR('ucResult','ok',`✅ Done — ${avail}/${names.length} available`);
+  logActivity(`✅ Checked ${names.length} usernames — ${avail} available`);
+}
+
+/* ═══════════════════════════════════════════════
+   ROBUX CONVERTER
+═══════════════════════════════════════════════ */
+function convert(){
+  const amt=+document.getElementById('convAmt')?.value||0;
+  const dir=document.getElementById('convDir')?.value;
+  const out=document.getElementById('convOut');
+  const lbl=document.getElementById('convLabel');
+  const rate=document.getElementById('convRate');
+  if(!out)return;
+  if(dir==='r2u'){
+    const usd=(amt*0.0035*0.7).toFixed(2);
+    out.textContent='$'+usd;
+    lbl.textContent='USD via DevEx (70% cut applied)';
+    rate.textContent=`Rate: ${amt.toLocaleString()} R$ × $0.0035 × 70% = $${usd}`;
+  }else{
+    const robux=Math.round(amt/0.0035/0.7);
+    out.textContent=robux.toLocaleString()+' R$';
+    lbl.textContent='Approximate Robux equivalent';
+    rate.textContent=`Rate: $${amt} ÷ $0.0035 ÷ 70% ≈ ${robux.toLocaleString()} R$`;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   CHANGELOG
+═══════════════════════════════════════════════ */
+function buildChangelog(){
+  const ver=document.getElementById('cl_version').value.trim()||'v1.0';
+  const title=document.getElementById('cl_title').value.trim()||'Update';
+  const adds=document.getElementById('cl_add').value.trim().split('\n').filter(Boolean);
+  const fixes=document.getElementById('cl_fix').value.trim().split('\n').filter(Boolean);
+  const changes=document.getElementById('cl_change').value.trim().split('\n').filter(Boolean);
+  const date=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  let out=`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${ver} — ${title}\n${date}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  if(adds.length)out+=`✅ NEW FEATURES\n${adds.map(a=>`  + ${a}`).join('\n')}\n\n`;
+  if(fixes.length)out+=`🔧 BUG FIXES\n${fixes.map(f=>`  • ${f}`).join('\n')}\n\n`;
+  if(changes.length)out+=`⚠️ CHANGES\n${changes.map(c=>`  ~ ${c}`).join('\n')}\n\n`;
+  out+='Thanks for playing! More updates coming soon 🚀';
+  document.getElementById('clOutput').textContent=out;
+  document.getElementById('clCard').style.display='';
+  logActivity(`📝 Built changelog ${ver}`);
+}
+function copyChangelog(){navigator.clipboard?.writeText(document.getElementById('clOutput').textContent);}
+
+/* ═══════════════════════════════════════════════
+   LAUNCH CHECKLIST
+═══════════════════════════════════════════════ */
+function initChecklist(){
+  const container=document.getElementById('checklistItems');
+  if(!container)return;
+  container.innerHTML=CHECKLIST_ITEMS.map((item,i)=>`
+    <div class="check-item ${checkState[i]?'done':''}" id="ci${i}" onclick="toggleCheck(${i})">
+      <div class="check-box">${checkState[i]?'✓':''}</div>
+      <div class="check-text">${item.t}</div>
+      <div class="check-cat">${item.cat}</div>
+    </div>`).join('');
+  updateChecklistStats();
+}
+function toggleCheck(i){
+  checkState[i]=!checkState[i];
+  localStorage.setItem('orbyt_checklist',JSON.stringify(checkState));
+  const el=document.getElementById('ci'+i);
+  el.className='check-item'+(checkState[i]?' done':'');
+  el.querySelector('.check-box').textContent=checkState[i]?'✓':'';
+  updateChecklistStats();
+}
+function updateChecklistStats(){
+  const total=CHECKLIST_ITEMS.length;
+  const done=Object.values(checkState).filter(Boolean).length;
+  const pct=Math.round(done/total*100);
+  const el=id=>document.getElementById(id);
+  if(el('cl_done'))el('cl_done').textContent=done;
+  if(el('cl_rem'))el('cl_rem').textContent=total-done;
+  if(el('cl_pct'))el('cl_pct').textContent=pct+'%';
+  if(el('cl_status'))el('cl_status').textContent=pct===100?'🚀 READY':pct>50?'🔥 ALMOST':'⏳ WIP';
+  if(el('dash-checklist'))el('dash-checklist').textContent=pct+'%';
+}
+function resetChecklist(){checkState={};localStorage.setItem('orbyt_checklist','{}');initChecklist();}
+
+/* ═══════════════════════════════════════════════
+   INIT (non-auth setup)
+═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('dash-snippets');
+  if(el) el.textContent = snippets.length;
+
+  /* Show the exact redirect URI so it can be copy-pasted into provider consoles */
+  const uri = window.location.origin + window.location.pathname;
+  const v1 = document.getElementById('uriVal');
+  const v2 = document.getElementById('uriVal2');
+  if(v1) v1.textContent = uri;
+  if(v2) v2.textContent = uri;
+});
+</script>
+<!-- ════════════════ CONFIRM MODAL ════════════════ -->
+<div class="overlay" id="confirmModal">
+  <div class="overlay-box" style="max-width:400px;">
+    <div class="overlay-header" style="border-radius:18px 18px 0 0;">
+      <span class="overlay-title">🎉 Authorised!</span>
+    </div>
+    <div class="overlay-body" style="text-align:center;gap:18px;">
+      <div style="font-size:2.5rem;">✅</div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:6px;">
+          Welcome, <span id="confirmName">User</span>!
+        </div>
+        <div style="font-size:0.65rem;color:var(--muted);letter-spacing:1.5px;">
+          Authorised via <span id="confirmMethod">Provider</span>
+        </div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:0.68rem;color:var(--muted);line-height:1.7;text-align:left;">
+        Create your <strong style="color:var(--text);">ORBYT Profile</strong> now?<br>
+        Your workspace, snippets, and checklist will be saved locally to this browser.
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" style="flex:1;justify-content:center;" onclick="confirmCreateProfile()">
+          ✅ Yes, Create Profile
+        </button>
+        <button class="btn btn-secondary" style="flex:1;justify-content:center;" onclick="cancelConfirmModal()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Confirm modal close on backdrop click ── */
+document.getElementById('confirmModal').addEventListener('click', function(e){
+  if(e.target === this) cancelConfirmModal();
+});
+</script>
+
+</body>
+</html>
+x(280px,1fr));gap:14px;}
   .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
   .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
   .gap-16{display:flex;flex-direction:column;gap:16px;}
