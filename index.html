@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ORBYT — Roblox Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#080a0f; --bg2:#0d1018; --bg3:#13161f;
+    --surface:#191d28; --surface2:#1f2435;
+    --border:#252a3a; --border2:#2d3347;
+    --coral:#ff6b4a; --amber:#ffb347; --neon:#4affb4;
+    --blue:#4a9fff; --purple:#a47fff;
+    --text:#f0f2f8; --text2:#8892a8; --text3:#4a5168;
+    --glass:rgba(25,29,40,0.85);
+    --sidebar-w:220px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;cursor:default;}
+
+  #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  #cursor-glow{position:fixed;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(255,107,74,0.05) 0%,transparent 70%);pointer-events:none;transform:translate(-50%,-50%);z-index:1;transition:left .08s,top .08s;}
+
+  /* PAGES */
+  .page{position:fixed;inset:0;z-index:10;display:none;}
+  .page.active{display:flex;}
+
+  /* ══ AUTH ══ */
+  #page-auth{align-items:center;justify-content:center;flex-direction:column;padding:16px;}
+
+  .auth-logo{font-family:'Syne',sans-serif;font-size:clamp(48px,8vw,72px);font-weight:800;letter-spacing:-4px;background:linear-gradient(135deg,var(--coral),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:logoReveal 1.2s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(30px) scale(0.9);}
+  @keyframes logoReveal{to{opacity:1;transform:translateY(0) scale(1);}}
+  .auth-tagline{color:var(--text2);font-size:clamp(10px,2vw,13px);letter-spacing:3px;text-transform:uppercase;margin-top:8px;animation:fadeUp 1.2s .3s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(10px);}
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+
+  .auth-card{margin-top:36px;background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--border2);border-radius:20px;padding:clamp(24px,4vw,40px);width:min(400px,calc(100vw - 32px));animation:fadeUp 1.2s .5s cubic-bezier(.16,1,.3,1) forwards;opacity:0;transform:translateY(20px);box-shadow:0 0 60px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05);}
+
+  .auth-tabs{display:flex;gap:0;margin-bottom:24px;background:var(--bg3);border-radius:10px;padding:4px;}
+  .auth-tab{flex:1;padding:8px;text-align:center;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text3);transition:all .2s;}
+  .auth-tab.active{background:var(--surface2);color:var(--text);}
+
+  .auth-panel{display:none;} .auth-panel.active{display:block;}
+
+  .auth-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;text-align:center;margin-bottom:6px;color:var(--text);}
+  .auth-sub{text-align:center;color:var(--text3);font-size:11px;margin-bottom:24px;letter-spacing:1px;}
+
+  .auth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;border-radius:12px;border:1px solid var(--border2);background:var(--surface);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;margin-bottom:10px;position:relative;overflow:hidden;}
+  .auth-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,107,74,0.1),transparent);opacity:0;transition:opacity .2s;}
+  .auth-btn:hover::before{opacity:1;}
+  .auth-btn:hover{border-color:var(--coral);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+  .auth-btn svg{width:20px;height:20px;flex-shrink:0;}
+
+  .auth-input-group{margin-bottom:12px;}
+  .auth-input-group label{display:block;font-size:10px;letter-spacing:2px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;}
+  .auth-input-group input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;}
+  .auth-input-group input:focus{border-color:var(--coral);box-shadow:0 0 0 3px rgba(255,107,74,0.08);}
+  .auth-input-group input::placeholder{color:var(--text3);}
+
+  .auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text3);font-size:11px;letter-spacing:2px;}
+  .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  .auth-terms{text-align:center;font-size:11px;color:var(--text3);line-height:1.6;margin-top:16px;}
+  .auth-terms span{color:var(--coral);cursor:pointer;}
+
+  .oauth-info{background:rgba(74,159,255,0.08);border:1px solid rgba(74,159,255,0.2);border-radius:10px;padding:10px 14px;font-size:11px;color:var(--blue);margin-bottom:14px;line-height:1.6;}
+
+  /* ══ APP SHELL ══ */
+  #page-app{flex-direction:row;}
+
+  /* SIDEBAR */
+  .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100%;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:20;transition:transform .3s;overflow:hidden;}
+
+  .sidebar-logo{padding:20px 16px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .sidebar-logo-mark{width:30px;height:30px;flex-shrink:0;}
+  .sidebar-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-1px;background:linear-gradient(135deg,var(--coral),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+  .sidebar-nav{flex:1;padding:8px 6px;overflow-y:auto;overflow-x:hidden;}
+  .nav-section{font-size:9px;letter-spacing:2px;color:var(--text3);padding:10px 10px 4px;text-transform:uppercase;}
+  .nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:500;color:var(--text2);transition:all .15s;margin-bottom:1px;white-space:nowrap;position:relative;overflow:hidden;}
+  .nav-item::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:0;background:var(--coral);border-radius:2px;transition:height .2s;}
+  .nav-item:hover{background:var(--surface);color:var(--text);}
+  .nav-item.active{background:var(--surface2);color:var(--coral);font-weight:600;}
+  .nav-item.active::before{height:18px;}
+  .nav-icon{width:14px;height:14px;flex-shrink:0;opacity:.8;}
+  .nav-badge{margin-left:auto;background:var(--coral);color:#000;font-size:8px;font-weight:700;padding:2px 5px;border-radius:20px;}
+
+  .sidebar-user{padding:12px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px;cursor:pointer;transition:background .15s;flex-shrink:0;}
+  .sidebar-user:hover{background:var(--surface);}
+  .user-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+  .user-info{overflow:hidden;min-width:0;}
+  .user-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .user-plan{font-size:9px;color:var(--amber);letter-spacing:1px;}
+
+  /* MOBILE SIDEBAR TOGGLE */
+  .sidebar-toggle{display:none;position:fixed;top:14px;left:14px;z-index:50;width:36px;height:36px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;align-items:center;justify-content:center;cursor:pointer;color:var(--text);}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:19;backdrop-filter:blur(4px);}
+
+  /* MAIN */
+  .main{flex:1;height:100%;overflow:hidden;display:flex;flex-direction:column;min-width:0;}
+
+  .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;background:var(--bg2);flex-shrink:0;}
+  .topbar-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;}
+  .topbar-search{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px 12px;width:clamp(140px,25vw,220px);transition:border-color .2s;}
+  .topbar-search:focus-within{border-color:var(--coral);box-shadow:0 0 0 3px rgba(255,107,74,0.1);}
+  .topbar-search input{background:none;border:none;outline:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;width:100%;}
+  .topbar-search input::placeholder{color:var(--text3);}
+  .topbar-actions{display:flex;gap:6px;}
+  .icon-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;color:var(--text2);}
+  .icon-btn:hover{border-color:var(--coral);color:var(--coral);}
+
+  .content{flex:1;overflow-y:auto;padding:clamp(16px,3vw,28px);}
+
+  /* PANELS */
+  .panel{display:none;}
+  .panel.active{display:block;animation:panelIn .35s cubic-bezier(.16,1,.3,1);}
+  @keyframes panelIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  /* CARDS */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(16px,3vw,22px);transition:border-color .2s,box-shadow .2s;}
+  .card:hover{border-color:var(--border2);box-shadow:0 8px 32px rgba(0,0,0,0.2);}
+  .card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .card-sub{font-size:10px;color:var(--text3);letter-spacing:1px;}
+
+  /* GRIDS — responsive */
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;}
+  .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+  .grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+  .gap-16{display:flex;flex-direction:column;gap:16px;}
+
+  /* STAT CARDS */
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:all .2s;}
+  .stat-card::after{content:'';position:absolute;right:-15px;top:-15px;width:70px;height:70px;border-radius:50%;background:var(--accent-color,var(--coral));opacity:0.07;transition:transform .3s;}
+  .stat-card:hover::after{transform:scale(1.5);}
+  .stat-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+  .stat-value{font-family:'Syne',sans-serif;font-size:clamp(20px,4vw,26px);font-weight:800;color:var(--text);line-height:1;}
+  .stat-label{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:5px;}
+  .stat-change{font-size:10px;margin-top:8px;display:flex;align-items:center;gap:4px;}
+  .stat-change.up{color:var(--neon);}
+  .stat-change.down{color:var(--coral);}
+
+  /* BTN */
+  .btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;border:none;cursor:pointer;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;transition:all .15s;}
+  .btn-primary{background:linear-gradient(135deg,var(--coral),#ff8c6b);color:#000;box-shadow:0 4px 14px rgba(255,107,74,0.25);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,107,74,0.35);}
+  .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border2);}
+  .btn-ghost:hover{border-color:var(--coral);color:var(--coral);}
+  .btn-neon{background:rgba(74,255,180,0.1);color:var(--neon);border:1px solid rgba(74,255,180,0.25);}
+  .btn-neon:hover{background:rgba(74,255,180,0.2);}
+
+  /* INPUT */
+  .input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;}
+  .input:focus{border-color:var(--coral);box-shadow:0 0 0 3px rgba(255,107,74,0.08);}
+  .input::placeholder{color:var(--text3);}
+  select.input{cursor:pointer;}
+  textarea.input{resize:vertical;min-height:90px;}
+  .label{display:block;font-size:10px;letter-spacing:1.5px;color:var(--text2);margin-bottom:5px;text-transform:uppercase;}
+
+  /* TAGS */
+  .tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;border:1px solid;}
+  .tag-coral{background:rgba(255,107,74,0.1);color:var(--coral);border-color:rgba(255,107,74,0.2);}
+  .tag-neon{background:rgba(74,255,180,0.1);color:var(--neon);border-color:rgba(74,255,180,0.2);}
+  .tag-blue{background:rgba(74,159,255,0.1);color:var(--blue);border-color:rgba(74,159,255,0.2);}
+  .tag-amber{background:rgba(255,179,71,0.1);color:var(--amber);border-color:rgba(255,179,71,0.2);}
+
+  /* TOAST */
+  #toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:7px;z-index:9999;max-width:calc(100vw - 40px);}
+  .toast{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 16px;font-size:12px;color:var(--text);display:flex;align-items:center;gap:8px;animation:toastIn .3s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+  .toast.success{border-left:3px solid var(--neon);}
+  .toast.info{border-left:3px solid var(--blue);}
+  .toast.warn{border-left:3px solid var(--amber);}
+  @keyframes toastIn{from{transform:translateX(40px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:16px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:clamp(20px,4vw,28px);width:min(480px,100%);animation:modalIn .3s cubic-bezier(.16,1,.3,1);position:relative;max-height:90vh;overflow-y:auto;}
+  @keyframes modalIn{from{transform:scale(.92) translateY(20px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}
+  .modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin-bottom:18px;color:var(--text);}
+  .modal-close{position:absolute;top:16px;right:16px;width:26px;height:26px;border-radius:7px;background:var(--surface);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;transition:all .15s;}
+  .modal-close:hover{color:var(--coral);border-color:var(--coral);}
+
+  /* SECTION HEADERS */
+  .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .section-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--text);}
+  .section-sub{font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:2px;}
+
+  /* WELCOME BANNER */
+  .welcome-banner{background:linear-gradient(135deg,var(--surface),var(--surface2));border:1px solid var(--border2);border-radius:18px;padding:clamp(18px,4vw,26px);display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;position:relative;overflow:hidden;flex-wrap:wrap;gap:12px;}
+  .welcome-banner::before{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(255,107,74,0.12),transparent 70%);}
+  .welcome-title{font-family:'Syne',sans-serif;font-size:clamp(16px,4vw,20px);font-weight:800;color:var(--text);margin-bottom:3px;}
+  .welcome-sub{font-size:11px;color:var(--text3);}
+
+  /* ACTIVITY */
+  .activity-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .activity-item:last-child{border-bottom:none;}
+  .activity-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .activity-text{font-size:11px;color:var(--text2);flex:1;}
+  .activity-time{font-size:10px;color:var(--text3);}
+
+  /* SCRIPT */
+  .script-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;transition:all .15s;cursor:pointer;}
+  .script-item:hover{border-color:var(--border2);background:var(--surface2);}
+  .script-header{display:flex;align-items:center;gap:9px;margin-bottom:9px;flex-wrap:wrap;}
+  .script-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--text);flex:1;}
+  .script-code{background:var(--bg3);border-radius:7px;padding:10px;font-size:10px;color:var(--neon);line-height:1.7;overflow:hidden;max-height:70px;border:1px solid var(--border);}
+
+  /* ECON */
+  .sim-controls{display:flex;flex-direction:column;gap:14px;}
+  .range-wrap{display:flex;flex-direction:column;gap:5px;}
+  .range-row{display:flex;align-items:center;gap:10px;}
+  input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--coral);border-radius:50%;cursor:pointer;box-shadow:0 0 6px rgba(255,107,74,0.4);}
+  .range-val{font-size:12px;color:var(--coral);font-weight:600;min-width:55px;text-align:right;}
+  .chart-container{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  canvas#econ-chart{width:100%!important;height:160px!important;}
+
+  /* ROBUX CONVERTER */
+  .converter-display{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;}
+  .converter-amount{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,44px);font-weight:800;color:var(--amber);line-height:1;}
+  .converter-label{font-size:11px;color:var(--text3);letter-spacing:2px;margin-top:5px;}
+
+  /* USERNAME */
+  .username-result{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:9px;border:1px solid var(--border);margin-bottom:7px;font-size:12px;transition:all .2s;}
+  .username-result.available{border-color:rgba(74,255,180,.3);background:rgba(74,255,180,.05);color:var(--neon);}
+  .username-result.taken{border-color:rgba(255,107,74,.3);background:rgba(255,107,74,.05);color:var(--coral);}
+
+  /* CHANGELOG */
+  .changelog-preview{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:18px;font-size:12px;line-height:1.8;}
+  .changelog-version{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--coral);margin-bottom:3px;}
+  .changelog-date{color:var(--text3);font-size:10px;margin-bottom:12px;}
+  .changelog-section{color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin:8px 0 4px;}
+  .changelog-line{color:var(--text2);display:flex;gap:7px;}
+  .changelog-line::before{content:'→';color:var(--text3);}
+
+  /* CHECKLIST */
+  .checklist-item{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+  .checklist-item:last-child{border:none;}
+  .check-box{width:18px;height:18px;border-radius:5px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;margin-top:1px;}
+  .checklist-item.done .check-box{background:var(--neon);border-color:var(--neon);}
+  .check-text{font-size:12px;color:var(--text);}
+  .check-sub{font-size:10px;color:var(--text3);margin-top:2px;}
+  .checklist-item.done .check-text{text-decoration:line-through;color:var(--text3);}
+
+  /* PROGRESS */
+  .progress-bar-wrap{background:var(--bg3);border-radius:4px;height:5px;overflow:hidden;margin:12px 0;}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--neon),var(--blue));border-radius:4px;transition:width .4s cubic-bezier(.16,1,.3,1);}
+
+  /* PITCH */
+  .pitch-output{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:20px;line-height:1.8;font-size:12px;color:var(--text2);min-height:180px;}
+
+  /* SETTINGS */
+  .settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+  .settings-row:last-child{border:none;}
+  .toggle{width:38px;height:20px;background:var(--bg3);border-radius:10px;border:1px solid var(--border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+  .toggle.on{background:var(--coral);border-color:var(--coral);}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+  .toggle.on::after{transform:translateX(18px);}
+
+  /* RATE TICKER */
+  .rate-ticker{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--text3);padding:5px 10px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);}
+  .rate-dot{width:5px;height:5px;background:var(--neon);border-radius:50%;animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.5);opacity:.5;}}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--coral);}
+
+  /* SPINNER */
+  .spinner{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--coral);border-radius:50%;animation:spin .6s linear infinite;display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* NOTIF DOT */
+  .notif-dot{position:absolute;top:7px;right:7px;width:5px;height:5px;background:var(--coral);border-radius:50%;animation:pulse 2s infinite;}
+
+  /* ACCOUNT CHECKER — new styles */
+  .profile-banner{background:linear-gradient(135deg,#1a1d2e,#0d1018);border:1px solid var(--border2);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .rblx-avatar{width:72px;height:72px;border-radius:50%;border:2px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;}
+  .rblx-avatar img{width:72px;height:72px;border-radius:50%;object-fit:cover;}
+  .profile-name{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);}
+  .profile-handle{font-size:11px;color:var(--text3);margin-top:2px;}
+
+  .value-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px;}
+  .value-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+  .value-num{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--text);}
+  .value-lbl{font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;}
+
+  .inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-top:12px;}
+  .inv-item{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 6px;text-align:center;transition:all .15s;cursor:default;}
+  .inv-item:hover{border-color:var(--border2);}
+  .inv-item-icon{font-size:24px;display:block;margin-bottom:4px;}
+  .inv-item-name{font-size:9px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .inv-item-price{font-size:9px;color:var(--amber);margin-top:2px;}
+
+  /* BADGE GRID */
+  .badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
+  .badge-item{background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:12px 8px;text-align:center;}
+  .badge-icon{font-size:22px;display:block;margin-bottom:5px;}
+  .badge-name{font-size:9px;color:var(--text2);line-height:1.3;}
+
+  /* FRIENDS */
+  .friend-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:9px;border:1px solid var(--border);margin-bottom:6px;}
+  .friend-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+  .friend-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;flex:1;}
+  .online-dot{width:7px;height:7px;border-radius:50%;background:var(--neon);}
+  .offline-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
+
+  /* GROUP ITEM */
+  .group-item{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg3);border-radius:9px;border:1px solid var(--border);margin-bottom:6px;}
+  .group-icon{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,var(--amber),var(--coral));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#000;flex-shrink:0;}
+  .group-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;flex:1;}
+  .group-role{font-size:10px;color:var(--text3);}
+
+  /* GAME SEARCH */
+  .game-result{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:all .15s;cursor:pointer;}
+  .game-result:hover{border-color:var(--border2);}
+  .game-thumb-sm{width:50px;height:50px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .game-result-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:2px;}
+  .game-result-stats{font-size:10px;color:var(--text3);}
+
+  /* OUTFIT BUILDER */
+  .outfit-slot{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;}
+  .outfit-slot:hover{border-color:var(--coral);}
+  .outfit-slot-icon{font-size:28px;margin-bottom:6px;}
+  .outfit-slot-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
+
+  /* TRADE CALC */
+  .trade-side{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;flex:1;}
+  .trade-side-title{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;margin-bottom:10px;color:var(--text);}
+
+  /* LIMITED TRACKER */
+  .limited-row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border);}
+  .limited-row:last-child{border:none;}
+  .limited-name{font-size:12px;flex:1;}
+  .limited-val{font-size:12px;color:var(--amber);font-weight:600;}
+  .limited-change.up{color:var(--neon);font-size:11px;}
+  .limited-change.dn{color:var(--coral);font-size:11px;}
+
+  /* EXPERIENCE BUILDER */
+  .exp-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:11px;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);cursor:pointer;transition:all .15s;}
+  .exp-tag:hover,.exp-tag.sel{background:rgba(255,107,74,.12);border-color:rgba(255,107,74,.3);color:var(--coral);}
+
+  /* ROBUX TRACKER */
+  .robux-entry{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .robux-entry:last-child{border:none;}
+  .robux-type{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .robux-desc{flex:1;font-size:11px;color:var(--text2);}
+  .robux-amount{font-size:12px;font-weight:600;}
+
+  /* COLOR PALETTE */
+  .palette-swatch{width:40px;height:40px;border-radius:8px;cursor:pointer;transition:transform .15s;border:2px solid transparent;flex-shrink:0;}
+  .palette-swatch:hover{transform:scale(1.15);}
+  .palette-swatch.sel{border-color:#fff;}
+
+  /* NOTIFICATION BADGE */
+  .notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+  .notif-item:last-child{border:none;}
+  .notif-icon{width:32px;height:32px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .notif-text{font-size:11px;color:var(--text2);line-height:1.5;flex:1;}
+  .notif-time{font-size:10px;color:var(--text3);}
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    :root{--sidebar-w:240px;}
+    .sidebar{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);z-index:30;}
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-toggle{display:flex;}
+    .sidebar-overlay.open{display:block;}
+    .topbar{padding-left:58px;}
+    .content{padding:14px;}
+    .auth-card{margin-top:24px;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div id="cursor-glow"></div>
+<div id="toast-container"></div>
+
+<!-- MOBILE SIDEBAR TOGGLE -->
+<div class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+    <line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/>
+  </svg>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<!-- ═════════════ AUTH PAGE ═════════════ -->
+<div class="page active" id="page-auth">
+  <div class="auth-logo">ORBYT</div>
+  <div class="auth-tagline">Roblox Tool</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('signin')">Sign In</div>
+      <div class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</div>
+    </div>
+
+    <!-- SIGN IN -->
+    <div class="auth-panel active" id="auth-signin">
+      <div class="auth-title">Welcome Back</div>
+      <div class="auth-sub">SIGN IN TO CONTINUE</div>
+
+      <div class="oauth-info">🔒 Clicking OAuth buttons redirects you to the official provider authorization page. We never store your password.</div>
+
+      <button class="auth-btn" onclick="doOAuth('Google')">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-divider">OR</div>
+
+      <button class="auth-btn" onclick="doOAuth('Roblox')">
+        <!-- Official Roblox Logo SVG -->
+        <svg viewBox="0 0 47.8 47.8" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5.04 35.27L0 13.32l28.82-7.56L33.8 28.7 5.04 35.27zm15.44-14.03l-2.08 7.75 7.77-2.03-2.07-7.77-7.62 2.05z" fill="#e52207"/>
+          <path d="M33.86 28.73L5.04 35.3l7.49 12.5 28.82-7.56-7.49-12.51z" fill="#e52207"/>
+          <path d="M33.86 28.73L26.36 16.2 47.79 0l7.5 12.51-21.43 16.22z" fill="#e52207" opacity=".7"/>
+          <path d="M26.36 16.2L5.04 0 0 13.32l28.82-7.56L26.36 16.2z" fill="#e52207" opacity=".5"/>
+        </svg>
+        Continue with Roblox
+      </button>
+
+      <div class="auth-terms">By continuing you agree to our <span>Terms of Service</span><br>and <span>Privacy Policy</span></div>
+    </div>
+
+    <!-- SIGN UP -->
+    <div class="auth-panel" id="auth-signup">
+      <div class="auth-title">Create Account</div>
+      <div class="auth-sub">JOIN ORBYT TODAY</div>
+
+      <div class="oauth-info">🔒 OAuth redirects you to the official provider. Your Roblox/Google account IS your ORBYT account — no separate password needed.</div>
+
+      <button class="auth-btn" onclick="doOAuth('Google')">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Sign Up with Google
+      </button>
+
+      <div class="auth-divider">OR</div>
+
+      <button class="auth-btn" onclick="doOAuth('Roblox')">
+        <svg viewBox="0 0 47.8 47.8" fill="none"><path d="M5.04 35.27L0 13.32l28.82-7.56L33.8 28.7 5.04 35.27zm15.44-14.03l-2.08 7.75 7.77-2.03-2.07-7.77-7.62 2.05z" fill="#e52207"/><path d="M33.86 28.73L5.04 35.3l7.49 12.5 28.82-7.56-7.49-12.51z" fill="#e52207"/></svg>
+        Sign Up with Roblox
+      </button>
+
+      <div class="auth-terms">By signing up you agree to our <span>Terms of Service</span><br>and <span>Privacy Policy</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════ APP PAGE ═════════════ -->
+<div class="page" id="page-app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg class="sidebar-logo-mark" viewBox="0 0 30 30" fill="none">
+        <path d="M3 22.5L0 8.5l18-4.5 3 14-18 4.5zm10-9l-1.5 5 5-1.5-1.5-5-4 1.5z" fill="#ff6b4a"/>
+        <path d="M21 17.5L3 22.5l4.5 7.5 18-4.5-4.5-7.5z" fill="#ffb347"/>
+      </svg>
+      <div class="sidebar-logo-text">ORBYT</div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" data-panel="dashboard">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+      </div>
+
+      <div class="nav-section">Roblox</div>
+      <div class="nav-item" data-panel="account-checker">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
+        Account Checker
+      </div>
+      <div class="nav-item" data-panel="inventory">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="14" height="10" rx="1"/><path d="M5 4V3a3 3 0 016 0v1"/></svg>
+        Inventory Viewer
+      </div>
+      <div class="nav-item" data-panel="friends">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="3"/><circle cx="11" cy="5" r="3"/><path d="M1 14c0-2.2 1.8-4 4-4M8 14c0-2.2 1.8-4 4-4"/></svg>
+        Friends List
+      </div>
+      <div class="nav-item" data-panel="groups">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="2"/><line x1="1" y1="7" x2="15" y2="7"/></svg>
+        Groups
+      </div>
+      <div class="nav-item" data-panel="game-search">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+        Game Search
+      </div>
+      <div class="nav-item" data-panel="badges">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l2 4 4.5.7-3.2 3.1.75 4.4L8 11l-4.05 2.2.75-4.4L1.5 5.7 6 5z"/></svg>
+        Badges
+      </div>
+      <div class="nav-item" data-panel="limiteds">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1v14M5 4h5.5a2.5 2.5 0 010 5H5M5 9h6a2.5 2.5 0 010 5H5"/></svg>
+        Limited Tracker
+        <span class="nav-badge">HOT</span>
+      </div>
+
+      <div class="nav-section">Tools</div>
+      <div class="nav-item" data-panel="scripts">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="5,4 2,8 5,12"/><polyline points="11,4 14,8 11,12"/><line x1="8" y1="2" x2="8" y2="14"/></svg>
+        Script Vault
+      </div>
+      <div class="nav-item" data-panel="economy">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1,12 5,7 9,9 15,3"/><polyline points="11,3 15,3 15,7"/></svg>
+        Economy Sim
+      </div>
+      <div class="nav-item" data-panel="robux">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 4v8M6 6h3a1.5 1.5 0 010 3H6"/><path d="M6 9h3.5"/></svg>
+        Robux Converter
+      </div>
+      <div class="nav-item" data-panel="robux-tracker">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h3M5 11h4"/></svg>
+        Robux Tracker
+      </div>
+      <div class="nav-item" data-panel="trade-calc">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 9l4-4 4 4 6-6M13 3h3v3"/></svg>
+        Trade Calculator
+      </div>
+      <div class="nav-item" data-panel="outfit">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2l-3 3 1 8h10l1-8-3-3"/><path d="M5 2c0 1.66 1.34 3 3 3s3-1.34 3-3"/></svg>
+        Outfit Builder
+      </div>
+      <div class="nav-item" data-panel="usernames">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
+        Username Checker
+      </div>
+
+      <div class="nav-section">Dev</div>
+      <div class="nav-item" data-panel="pitch">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h10a1 1 0 011 1v8a1 1 0 01-1 1H5l-3 3V3a1 1 0 011-1z"/></svg>
+        Pitch Generator
+      </div>
+      <div class="nav-item" data-panel="changelog">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><line x1="5" y1="6" x2="11" y2="6"/><line x1="5" y1="9" x2="9" y2="9"/></svg>
+        Changelog Builder
+      </div>
+      <div class="nav-item" data-panel="checklist">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,8 6,12 14,4"/></svg>
+        Launch Checklist
+      </div>
+      <div class="nav-item" data-panel="experience-builder">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="12" rx="2"/><line x1="8" y1="5" x2="8" y2="11"/><line x1="5" y1="8" x2="11" y2="8"/></svg>
+        Experience Builder
+      </div>
+      <div class="nav-item" data-panel="color-palette">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="4" r="1.5" fill="currentColor"/><circle cx="11.6" cy="10" r="1.5" fill="currentColor"/><circle cx="4.4" cy="10" r="1.5" fill="currentColor"/></svg>
+        Color Palette
+      </div>
+
+      <div class="nav-section">Account</div>
+      <div class="nav-item" data-panel="notifications">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1a5 5 0 00-5 5v3l-1.5 2.5h13L13 9V6a5 5 0 00-5-5zM6.5 13.5a1.5 1.5 0 003 0"/></svg>
+        Notifications
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" data-panel="settings">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="sidebar-user" id="sidebar-user" onclick="navigate('settings')">
+      <div class="user-avatar" id="user-avatar-init">?</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name-display">Not signed in</div>
+        <div class="user-plan" id="user-plan-display">ORBYT USER</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-search">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#4a5168" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/></svg>
+        <input id="global-search" type="text" placeholder="Search pages...">
+      </div>
+      <div class="topbar-actions">
+        <div class="icon-btn" onclick="navigate('notifications')" style="position:relative;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1a5 5 0 00-5 5v3l-1.5 2.5h13L13 9V6a5 5 0 00-5-5zM6.5 13.5a1.5 1.5 0 003 0"/></svg>
+          <div class="notif-dot"></div>
+        </div>
+        <div class="icon-btn" onclick="logout()">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l4-4-4-4M14 8H6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="welcome-banner">
+          <div>
+            <div class="welcome-title">Welcome back, <span id="welcome-name" style="color:var(--coral)">User</span> 👋</div>
+            <div class="welcome-sub">Your Roblox hub is ready.</div>
+          </div>
+          <button class="btn btn-primary" onclick="navigate('account-checker')">🔍 Check Account</button>
+        </div>
+        <div class="grid-4" style="margin-bottom:18px">
+          <div class="stat-card" style="--accent-color:var(--coral)"><div class="stat-value" id="d-robux">R$ 0</div><div class="stat-label">Robux Balance</div><div class="stat-change up">↑ connected via Roblox</div></div>
+          <div class="stat-card" style="--accent-color:var(--amber)"><div class="stat-value" id="d-friends">0</div><div class="stat-label">Friends</div><div class="stat-change up">↑ online now</div></div>
+          <div class="stat-card" style="--accent-color:var(--neon)"><div class="stat-value" id="d-items">0</div><div class="stat-label">Inventory Items</div><div class="stat-change up">public items</div></div>
+          <div class="stat-card" style="--accent-color:var(--blue)"><div class="stat-value" id="d-groups">0</div><div class="stat-label">Groups</div><div class="stat-change up">member</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><div class="card-title">Recent Activity</div><div class="card-sub" style="margin-bottom:12px">LAST 7 DAYS</div><div id="activity-feed"></div></div>
+          <div class="card"><div class="card-title">Quick Actions</div><div class="card-sub" style="margin-bottom:12px">JUMP RIGHT IN</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-ghost" onclick="navigate('account-checker')">🔍 Check Account</button>
+              <button class="btn btn-ghost" onclick="navigate('inventory')">🎒 Inventory</button>
+              <button class="btn btn-ghost" onclick="navigate('limiteds')">💎 Limiteds</button>
+              <button class="btn btn-ghost" onclick="navigate('robux')">💱 Convert Robux</button>
+              <button class="btn btn-ghost" onclick="navigate('scripts')">📝 Script Vault</button>
+              <button class="btn btn-ghost" onclick="navigate('trade-calc')">🤝 Trade Calc</button>
+              <button class="btn btn-ghost" onclick="navigate('pitch')">💡 Pitch Doc</button>
+              <button class="btn btn-ghost" onclick="navigate('color-palette')">🎨 Palette</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ACCOUNT CHECKER ── -->
+      <div class="panel" id="panel-account-checker">
+        <div class="section-head"><div><div class="section-title">Account Checker</div><div class="section-sub">ROBLOX PROFILE VALUE & STATS</div></div></div>
+        <div class="card" style="max-width:520px;margin-bottom:16px">
+          <label class="label">Roblox Username or User ID</label>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="rblx-username-input" type="text" placeholder="e.g. Builderman or 156">
+            <button class="btn btn-primary" onclick="checkRobloxAccount()">Check</button>
+          </div>
+          <div style="margin-top:10px;font-size:10px;color:var(--text3)">Uses Roblox public API. Only public data is shown.</div>
+        </div>
+        <div id="account-result" style="display:none">
+          <div class="profile-banner" id="profile-banner">
+            <div class="rblx-avatar" id="profile-avatar">🎮</div>
+            <div>
+              <div class="profile-name" id="profile-name">Loading...</div>
+              <div class="profile-handle" id="profile-handle">@username</div>
+              <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap" id="profile-tags"></div>
+            </div>
+          </div>
+          <div class="value-grid" id="value-grid"></div>
+          <div class="card" style="margin-top:14px">
+            <div class="card-title" style="margin-bottom:4px">Account Description</div>
+            <div id="profile-desc" style="font-size:12px;color:var(--text2);line-height:1.6;margin-top:8px"></div>
+          </div>
+          <div class="card" style="margin-top:14px">
+            <div class="card-title" style="margin-bottom:4px">Account Value Estimate</div>
+            <div class="card-sub" style="margin-bottom:12px">BASED ON ACCOUNT AGE & RAP</div>
+            <div id="value-estimate" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── INVENTORY ── -->
+      <div class="panel" id="panel-inventory">
+        <div class="section-head"><div><div class="section-title">Inventory Viewer</div><div class="section-sub">PUBLIC ITEM COLLECTIONS</div></div></div>
+        <div class="card" style="max-width:520px;margin-bottom:16px">
+          <label class="label">Roblox Username</label>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="inv-username-input" type="text" placeholder="Enter username">
+            <button class="btn btn-primary" onclick="checkInventory()">View Inventory</button>
+          </div>
+        </div>
+        <div id="inventory-result" style="display:none">
+          <div class="section-head">
+            <div><div class="section-title" id="inv-title">Inventory</div><div class="section-sub" id="inv-count">0 items</div></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap" id="inv-filters"></div>
+          </div>
+          <div class="inventory-grid" id="inventory-grid"></div>
+        </div>
+      </div>
+
+      <!-- ── FRIENDS ── -->
+      <div class="panel" id="panel-friends">
+        <div class="section-head"><div><div class="section-title">Friends List</div><div class="section-sub">VIEW ROBLOX FRIENDS</div></div></div>
+        <div class="card" style="max-width:520px;margin-bottom:16px">
+          <label class="label">Roblox Username</label>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="friends-username-input" type="text" placeholder="Enter username">
+            <button class="btn btn-primary" onclick="checkFriends()">View Friends</button>
+          </div>
+        </div>
+        <div id="friends-result" style="display:none">
+          <div class="grid-2" id="friends-grid"></div>
+        </div>
+      </div>
+
+      <!-- ── GROUPS ── -->
+      <div class="panel" id="panel-groups">
+        <div class="section-head"><div><div class="section-title">Groups</div><div class="section-sub">ROBLOX GROUP MEMBERSHIPS</div></div></div>
+        <div class="card" style="max-width:520px;margin-bottom:16px">
+          <label class="label">Roblox Username</label>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="groups-username-input" type="text" placeholder="Enter username">
+            <button class="btn btn-primary" onclick="checkGroups()">View Groups</button>
+          </div>
+        </div>
+        <div id="groups-result" style="display:none">
+          <div id="groups-list"></div>
+        </div>
+      </div>
+
+      <!-- ── GAME SEARCH ── -->
+      <div class="panel" id="panel-game-search">
+        <div class="section-head"><div><div class="section-title">Game Search</div><div class="section-sub">FIND ROBLOX EXPERIENCES</div></div></div>
+        <div class="card" style="max-width:520px;margin-bottom:16px">
+          <label class="label">Search Games</label>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="game-search-input" type="text" placeholder="e.g. Adopt Me, Blox Fruits...">
+            <button class="btn btn-primary" onclick="searchGames()">Search</button>
+          </div>
+        </div>
+        <div id="game-search-result"></div>
+      </div>
+
+      <!-- ── BADGES ── -->
+      <div class="panel" id="panel-badges">
+        <div class="section-head"><div><div class="section-title">Badges</div><div class="section-sub">EARNED ROBLOX BADGES</div></div></div>
+        <div class="card" style="max-width:520px;margin-bottom:16px">
+          <label class="label">Roblox Username</label>
+          <div style="display:flex;gap:8px">
+            <input class="input" id="badges-username-input" type="text" placeholder="Enter username">
+            <button class="btn btn-primary" onclick="checkBadges()">View Badges</button>
+          </div>
+        </div>
+        <div id="badges-result" style="display:none">
+          <div class="badge-grid" id="badges-grid"></div>
+        </div>
+      </div>
+
+      <!-- ── LIMITEDS TRACKER ── -->
+      <div class="panel" id="panel-limiteds">
+        <div class="section-head"><div><div class="section-title">Limited Tracker</div><div class="section-sub">RAP & VALUE ESTIMATES</div></div></div>
+        <div class="grid-2" style="margin-bottom:16px">
+          <div class="stat-card" style="--accent-color:var(--amber)"><div class="stat-value">R$ 47.2K</div><div class="stat-label">Total RAP (Demo)</div><div class="stat-change up">↑ 3.2% this week</div></div>
+          <div class="stat-card" style="--accent-color:var(--coral)"><div class="stat-value">12</div><div class="stat-label">Limited Items (Demo)</div><div class="stat-change up">↑ 2 gained value</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:4px">Popular Limiteds</div>
+          <div class="card-sub" style="margin-bottom:12px">COMMUNITY VALUE TRACKER</div>
+          <div id="limiteds-list"></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <label class="label">Look Up Any Limited</label>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <input class="input" id="limited-search-input" placeholder="Item name...">
+            <button class="btn btn-primary" onclick="searchLimited()">Look Up</button>
+          </div>
+          <div id="limited-search-result" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <!-- ── SCRIPTS ── -->
+      <div class="panel" id="panel-scripts">
+        <div class="section-head"><div><div class="section-title">Script Vault</div><div class="section-sub">YOUR LUA SNIPPET LIBRARY</div></div><button class="btn btn-primary" onclick="openScriptModal()">+ Save Script</button></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <span class="tag tag-coral" style="cursor:pointer" onclick="filterScripts('all')">All</span>
+          <span class="tag tag-neon" style="cursor:pointer" onclick="filterScripts('UI')">UI</span>
+          <span class="tag tag-blue" style="cursor:pointer" onclick="filterScripts('Combat')">Combat</span>
+          <span class="tag tag-amber" style="cursor:pointer" onclick="filterScripts('Economy')">Economy</span>
+          <span class="tag tag-blue" style="cursor:pointer" onclick="filterScripts('Utility')">Utility</span>
+        </div>
+        <div class="gap-16" id="scripts-list"></div>
+      </div>
+
+      <!-- ── ECONOMY SIM ── -->
+      <div class="panel" id="panel-economy">
+        <div class="section-head"><div><div class="section-title">Economy Simulator</div><div class="section-sub">PRICE & DROP RATE MODELER</div></div><div class="rate-ticker"><div class="rate-dot"></div>Live Rates</div></div>
+        <div class="grid-2">
+          <div class="card sim-controls">
+            <label class="label">Item Price (R$)</label>
+            <div class="range-wrap"><div class="range-row"><input type="range" id="r-price" min="10" max="1000" value="150" oninput="updateEcon()"><span class="range-val" id="v-price">R$ 150</span></div></div>
+            <label class="label">Drop Rate (%)</label>
+            <div class="range-wrap"><div class="range-row"><input type="range" id="r-drop" min="1" max="100" value="35" oninput="updateEcon()"><span class="range-val" id="v-drop">35%</span></div></div>
+            <label class="label">Daily Active Users</label>
+            <div class="range-wrap"><div class="range-row"><input type="range" id="r-dau" min="100" max="10000" value="2000" oninput="updateEcon()"><span class="range-val" id="v-dau">2,000</span></div></div>
+            <label class="label">Conversion Rate (%)</label>
+            <div class="range-wrap"><div class="range-row"><input type="range" id="r-conv" min="1" max="50" value="8" oninput="updateEcon()"><span class="range-val" id="v-conv">8%</span></div></div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text3)">Est. Daily Revenue</span><span style="color:var(--neon);font-weight:600" id="est-revenue">R$ 2,400</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:var(--text3)">Est. Monthly Revenue</span><span style="color:var(--amber);font-weight:600" id="est-monthly">R$ 72,000</span></div>
+            </div>
+          </div>
+          <div class="chart-container"><div class="card-title" style="margin-bottom:14px">Revenue Projection (30 days)</div><canvas id="econ-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ── ROBUX CONVERTER ── -->
+      <div class="panel" id="panel-robux">
+        <div class="section-head"><div><div class="section-title">Robux Converter</div><div class="section-sub">ROBUX ↔ USD WITH DEVEX RATES</div></div><div class="rate-ticker"><div class="rate-dot"></div>Rate: $0.0035 / R$</div></div>
+        <div style="max-width:460px">
+          <div class="card gap-16" style="margin-bottom:14px">
+            <div><label class="label">Convert From</label>
+              <div style="display:flex;gap:8px">
+                <input class="input" id="robux-amount" type="number" value="1000" oninput="convertRobux()" style="flex:1">
+                <select class="input" id="robux-dir" style="width:110px" onchange="convertRobux()">
+                  <option value="to_usd">R$ → USD</option>
+                  <option value="to_robux">USD → R$</option>
+                </select>
+              </div>
+            </div>
+            <div class="converter-display"><div class="converter-amount" id="conv-result">$3.50</div><div class="converter-label" id="conv-label">US DOLLARS</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">
+              <div style="padding:10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)"><div style="color:var(--text3);margin-bottom:3px;font-size:10px">After 30% fee</div><div style="color:var(--neon);font-weight:600" id="conv-after-fee">$2.45</div></div>
+              <div style="padding:10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)"><div style="color:var(--text3);margin-bottom:3px;font-size:10px">DevEx Rate</div><div style="color:var(--amber);font-weight:600">R$ 285.71/$1</div></div>
+            </div>
+          </div>
+          <div class="card"><div class="card-title" style="margin-bottom:10px">Quick Reference</div><div id="quick-ref" style="display:flex;flex-direction:column;gap:7px;font-size:12px"></div></div>
+        </div>
+      </div>
+
+      <!-- ── ROBUX TRACKER ── -->
+      <div class="panel" id="panel-robux-tracker">
+        <div class="section-head"><div><div class="section-title">Robux Tracker</div><div class="section-sub">LOG YOUR ROBUX INCOME & SPENDING</div></div><button class="btn btn-primary" onclick="addRobuxEntry()">+ Add Entry</button></div>
+        <div class="grid-2" style="margin-bottom:16px">
+          <div class="stat-card" style="--accent-color:var(--neon)"><div class="stat-value" id="rt-total-in">R$ 0</div><div class="stat-label">Total Earned</div></div>
+          <div class="stat-card" style="--accent-color:var(--coral)"><div class="stat-value" id="rt-total-out">R$ 0</div><div class="stat-label">Total Spent</div></div>
+        </div>
+        <div class="card"><div class="card-title" style="margin-bottom:12px">Transaction Log</div><div id="robux-log"></div></div>
+      </div>
+
+      <!-- ── TRADE CALCULATOR ── -->
+      <div class="panel" id="panel-trade-calc">
+        <div class="section-head"><div><div class="section-title">Trade Calculator</div><div class="section-sub">IS THIS TRADE WORTH IT?</div></div></div>
+        <div class="grid-2" style="margin-bottom:16px">
+          <div class="trade-side">
+            <div class="trade-side-title" style="color:var(--neon)">You Give</div>
+            <div id="give-items"><div style="color:var(--text3);font-size:12px">No items added</div></div>
+            <button class="btn btn-ghost" style="margin-top:10px;font-size:11px" onclick="addTradeItem('give')">+ Add Item</button>
+            <div style="margin-top:12px;display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--border);padding-top:10px">
+              <span style="color:var(--text3)">RAP Total</span>
+              <span style="color:var(--neon);font-weight:700" id="give-rap">R$ 0</span>
+            </div>
+          </div>
+          <div class="trade-side">
+            <div class="trade-side-title" style="color:var(--coral)">You Receive</div>
+            <div id="receive-items"><div style="color:var(--text3);font-size:12px">No items added</div></div>
+            <button class="btn btn-ghost" style="margin-top:10px;font-size:11px" onclick="addTradeItem('receive')">+ Add Item</button>
+            <div style="margin-top:12px;display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--border);padding-top:10px">
+              <span style="color:var(--text3)">RAP Total</span>
+              <span style="color:var(--coral);font-weight:700" id="receive-rap">R$ 0</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="trade-verdict" style="text-align:center;padding:24px">
+          <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px" id="verdict-text">Add items to evaluate</div>
+          <div style="font-size:12px;color:var(--text3)" id="verdict-sub">Enter items above then click evaluate</div>
+          <button class="btn btn-primary" style="margin-top:14px" onclick="evaluateTrade()">Evaluate Trade</button>
+        </div>
+      </div>
+
+      <!-- ── OUTFIT BUILDER ── -->
+      <div class="panel" id="panel-outfit">
+        <div class="section-head"><div><div class="section-title">Outfit Builder</div><div class="section-sub">PLAN YOUR ROBLOX LOOK</div></div><button class="btn btn-primary" onclick="saveOutfit()">💾 Save Outfit</button></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:14px">Body Parts</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="outfit-slots"></div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:8px">Outfit Preview</div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;height:220px;display:flex;align-items:center;justify-content:center;font-size:60px;margin-bottom:12px" id="outfit-preview">🧍</div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="outfit-summary"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── USERNAME CHECKER ── -->
+      <div class="panel" id="panel-usernames">
+        <div class="section-head"><div><div class="section-title">Username Checker</div><div class="section-sub">BULK AVAILABILITY CHECKER</div></div></div>
+        <div class="card" style="max-width:520px">
+          <label class="label">Enter Usernames (one per line or comma separated)</label>
+          <textarea class="input" id="username-input" style="min-height:90px" placeholder="DevMaster&#10;CoolGame123&#10;RobloxPro"></textarea>
+          <button class="btn btn-primary" style="margin-top:10px" onclick="checkUsernames()">🔍 Check Availability</button>
+        </div>
+        <div style="margin-top:14px;max-width:520px" id="username-results"></div>
+      </div>
+
+      <!-- ── PITCH GENERATOR ── -->
+      <div class="panel" id="panel-pitch">
+        <div class="section-head"><div><div class="section-title">Pitch Generator</div><div class="section-sub">AI-POWERED GAME CONCEPT DOCS</div></div></div>
+        <div class="grid-2">
+          <div class="card gap-16">
+            <div><label class="label">Game Genre</label><select class="input" id="pitch-genre"><option>Battle Royale</option><option>Simulator</option><option>Tycoon</option><option>Obby / Parkour</option><option>RPG</option><option>Horror</option><option>Racing</option></select></div>
+            <div><label class="label">Core Mechanic / Theme</label><input class="input" id="pitch-mechanic" type="text" placeholder="e.g. Zombies, Space, Fantasy..."></div>
+            <div><label class="label">Target Audience</label><select class="input" id="pitch-audience"><option>Kids (7-12)</option><option>Teens (13-17)</option><option>All Ages</option><option>Competitive Players</option></select></div>
+            <div><label class="label">Monetization Strategy</label><select class="input" id="pitch-mono"><option>Gamepasses</option><option>Developer Products</option><option>Subscriptions</option><option>Battle Pass</option></select></div>
+            <button class="btn btn-primary" onclick="generatePitch()" id="pitch-btn">✨ Generate Pitch Doc</button>
+          </div>
+          <div class="card"><div class="card-title" style="margin-bottom:10px">Generated Pitch</div>
+            <div class="pitch-output" id="pitch-output"><span style="color:var(--text3)">Fill in the fields and generate your game concept doc...</span></div>
+            <div style="display:flex;gap:8px;margin-top:10px" id="pitch-actions" style="display:none"><button class="btn btn-ghost" onclick="copyPitch()">📋 Copy</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CHANGELOG BUILDER ── -->
+      <div class="panel" id="panel-changelog">
+        <div class="section-head"><div><div class="section-title">Changelog Builder</div><div class="section-sub">FORMAT UPDATE NOTES</div></div></div>
+        <div class="grid-2">
+          <div class="card gap-16">
+            <div><label class="label">Version Number</label><input class="input" id="cl-version" type="text" value="v2.4.1"></div>
+            <div><label class="label">New Features (one per line)</label><textarea class="input" id="cl-features" placeholder="Added daily reward system&#10;New sword VFX"></textarea></div>
+            <div><label class="label">Bug Fixes (one per line)</label><textarea class="input" id="cl-fixes" placeholder="Fixed spawn glitch&#10;Chat filter resolved"></textarea></div>
+            <div><label class="label">Removed / Deprecated</label><textarea class="input" id="cl-removed" placeholder="Removed legacy shop UI" style="min-height:60px"></textarea></div>
+            <button class="btn btn-primary" onclick="buildChangelog()">📋 Build Changelog</button>
+          </div>
+          <div class="card"><div class="card-title" style="margin-bottom:10px">Preview</div>
+            <div class="changelog-preview" id="changelog-preview"><div style="color:var(--text3);font-size:12px">Preview will appear here...</div></div>
+            <button class="btn btn-ghost" style="margin-top:10px" onclick="copyChangelog()">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LAUNCH CHECKLIST ── -->
+      <div class="panel" id="panel-checklist">
+        <div class="section-head"><div><div class="section-title">Launch Checklist</div><div class="section-sub">PRE-LAUNCH VERIFICATION</div></div><div style="font-size:11px;color:var(--text3)" id="check-progress-text">0 / 12 Complete</div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar" id="check-progress-bar" style="width:0%"></div></div>
+        <div class="card"><div id="checklist-items"></div></div>
+      </div>
+
+      <!-- ── EXPERIENCE BUILDER ── -->
+      <div class="panel" id="panel-experience-builder">
+        <div class="section-head"><div><div class="section-title">Experience Builder</div><div class="section-sub">PLAN YOUR GAME CONCEPT</div></div></div>
+        <div class="grid-2">
+          <div class="card gap-16">
+            <div><label class="label">Game Name</label><input class="input" id="exp-name" placeholder="My Epic Game"></div>
+            <div><label class="label">Genre Tags (click to select)</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px" id="genre-tags">
+                <span class="exp-tag" onclick="toggleExpTag(this)">⚔️ Combat</span>
+                <span class="exp-tag" onclick="toggleExpTag(this)">🏗️ Tycoon</span>
+                <span class="exp-tag" onclick="toggleExpTag(this)">🧟 Survival</span>
+                <span class="exp-tag" onclick="toggleExpTag(this)">🏎️ Racing</span>
+                <span class="exp-tag" onclick="toggleExpTag(this)">👻 Horror</span>
+                <span class="exp-tag" onclick="toggleExpTag(this)">🧩 Puzzle</span>
+                <span class="exp-tag" onclick="toggleExpTag(this)">🎭 Roleplay</span>
+                <span class="exp-tag" onclick="toggleExpTag(this)">⚽ Sports</span>
+              </div>
+            </div>
+            <div><label class="label">Target Player Count</label>
+              <select class="input" id="exp-players">
+                <option>Solo (1)</option><option>Small (2-5)</option><option>Medium (6-20)</option><option>Large (21-50)</option><option>Server (51+)</option>
+              </select>
+            </div>
+            <div><label class="label">Core Loop Description</label><textarea class="input" id="exp-loop" placeholder="Describe the main gameplay loop..."></textarea></div>
+            <div><label class="label">Unique Selling Point</label><input class="input" id="exp-usp" placeholder="What makes your game different?"></div>
+            <button class="btn btn-primary" onclick="buildExperience()">🚀 Generate Game Plan</button>
+          </div>
+          <div class="card"><div class="card-title" style="margin-bottom:10px">Game Plan</div>
+            <div id="exp-output" class="pitch-output"><span style="color:var(--text3)">Fill in the form to generate your game plan...</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COLOR PALETTE ── -->
+      <div class="panel" id="panel-color-palette">
+        <div class="section-head"><div><div class="section-title">Color Palette</div><div class="section-sub">ROBLOX BRICKCOLOR & UI PALETTE BUILDER</div></div></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:10px">Brick Colors</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px" id="brick-colors"></div>
+            <div><label class="label">Generate Palette From Color</label>
+              <div style="display:flex;gap:8px;margin-top:4px">
+                <input type="color" id="base-color" value="#ff6b4a" style="width:50px;height:36px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;padding:2px">
+                <button class="btn btn-primary" onclick="generatePalette()">Generate</button>
+              </div>
+            </div>
+            <div id="generated-palette" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:10px">BrickColor Lookup</div>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <input class="input" id="bc-search" placeholder="e.g. Bright red, 1032...">
+              <button class="btn btn-primary" onclick="lookupBrickColor()">Look Up</button>
+            </div>
+            <div id="bc-result" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div id="bc-preview" style="width:48px;height:48px;border-radius:8px"></div>
+                <div><div id="bc-name" style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700"></div>
+                  <div id="bc-hex" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
+                  <div id="bc-num" style="font-size:11px;color:var(--text3)"></div>
+                </div>
+              </div>
+              <div style="margin-top:10px;font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--neon)" id="bc-lua"></div>
+            </div>
+            <div class="card-title" style="margin-top:16px;margin-bottom:8px">Saved Palette</div>
+            <div id="saved-palette" style="display:flex;flex-wrap:wrap;gap:8px;min-height:48px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px"></div>
+            <button class="btn btn-ghost" style="margin-top:8px;font-size:11px" onclick="copyPaletteCode()">📋 Copy as Lua</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NOTIFICATIONS ── -->
+      <div class="panel" id="panel-notifications">
+        <div class="section-head"><div><div class="section-title">Notifications</div><div class="section-sub">ACTIVITY ALERTS</div></div><button class="btn btn-ghost" onclick="clearNotifications()">Clear All</button></div>
+        <div class="card"><div id="notif-list"></div></div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="panel" id="panel-settings">
+        <div class="section-head"><div><div class="section-title">Settings</div><div class="section-sub">ACCOUNT & PREFERENCES</div></div></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title" style="margin-bottom:14px">Profile</div>
+            <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">
+              <div class="user-avatar" style="width:52px;height:52px;font-size:20px" id="settings-avatar">?</div>
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700" id="settings-name-display">User</div>
+                <div style="font-size:10px;color:var(--text3)" id="settings-provider-display">Not connected</div>
+              </div>
+            </div>
+            <div>
+              <label class="label">Display Name</label>
+              <input class="input" id="settings-name" type="text" value="User" style="margin-bottom:10px">
+              <button class="btn btn-primary" onclick="saveName()">Save Changes</button>
+            </div>
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <div class="card-title" style="margin-bottom:8px;font-size:12px">Connected Account</div>
+              <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:11px;color:var(--text2)" id="connected-account-display">Sign in with Roblox or Google to link your account.</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="margin-bottom:14px">Preferences</div>
+            <div class="settings-row"><div><div style="font-size:12px">Dark Mode</div><div style="font-size:10px;color:var(--text3)">Always enabled</div></div><div class="toggle on"></div></div>
+            <div class="settings-row"><div><div style="font-size:12px">Notifications</div><div style="font-size:10px;color:var(--text3)">Activity alerts</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="settings-row"><div><div style="font-size:12px">Sound Effects</div><div style="font-size:10px;color:var(--text3)">UI feedback</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            <div class="settings-row"><div><div style="font-size:12px">Compact Sidebar</div><div style="font-size:10px;color:var(--text3)">Reduce sidebar spacing</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            <div class="settings-row"><div><div style="font-size:12px">Auto-save Scripts</div><div style="font-size:10px;color:var(--text3)">Save on close</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div class="card-title" style="margin-bottom:3px">Danger Zone</div>
+          <div class="card-sub" style="margin-bottom:14px">IRREVERSIBLE ACTIONS</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn" style="background:rgba(255,107,74,0.1);color:var(--coral);border:1px solid rgba(255,107,74,0.3)" onclick="logout()">Sign Out</button>
+            <button class="btn btn-ghost" onclick="showToast('Account deletion requires email confirmation','warn')">Delete Account</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end content -->
+  </div><!-- end main -->
+</div><!-- end page-app -->
+
+<!-- SCRIPT MODAL -->
+<div class="modal-overlay" id="script-modal">
+  <div class="modal">
+    <div class="modal-title">Save Script</div>
+    <div class="modal-close" onclick="closeModal('script-modal')">✕</div>
+    <div class="gap-16">
+      <div><label class="label">Script Name</label><input class="input" id="sc-name" type="text" placeholder="e.g. PlayerHealth Module"></div>
+      <div><label class="label">Category</label><select class="input" id="sc-cat"><option>UI</option><option>Combat</option><option>Economy</option><option>Utility</option><option>Other</option></select></div>
+      <div><label class="label">Lua Code</label><textarea class="input" id="sc-code" style="min-height:110px;color:var(--neon)" placeholder="-- Paste your Lua code here"></textarea></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('script-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveScript()">Save to Vault</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRADE ITEM MODAL -->
+<div class="modal-overlay" id="trade-modal">
+  <div class="modal">
+    <div class="modal-title">Add Trade Item</div>
+    <div class="modal-close" onclick="closeModal('trade-modal')">✕</div>
+    <div class="gap-16">
+      <div><label class="label">Item Name</label><input class="input" id="trade-item-name" placeholder="e.g. Valkyrie Helm"></div>
+      <div><label class="label">RAP Value (R$)</label><input class="input" id="trade-item-rap" type="number" placeholder="e.g. 50000"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('trade-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddTradeItem()">Add Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROBUX ENTRY MODAL -->
+<div class="modal-overlay" id="robux-modal">
+  <div class="modal">
+    <div class="modal-title">Log Robux Transaction</div>
+    <div class="modal-close" onclick="closeModal('robux-modal')">✕</div>
+    <div class="gap-16">
+      <div><label class="label">Type</label><select class="input" id="rt-type"><option value="earned">Earned</option><option value="spent">Spent</option></select></div>
+      <div><label class="label">Amount (R$)</label><input class="input" id="rt-amount" type="number" placeholder="e.g. 500"></div>
+      <div><label class="label">Description</label><input class="input" id="rt-desc" placeholder="e.g. Gamepass sale, UGC purchase..."></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('robux-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmRobuxEntry()">Log Transaction</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ CANVAS BG ═══ */
+const canvas=document.getElementById('bg-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,t=0;
+function resizeCanvas(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+function drawGrid(){
+  ctx.clearRect(0,0,W,H);
+  const sz=60;
+  ctx.strokeStyle='rgba(37,42,58,0.7)';ctx.lineWidth=1;
+  for(let x=0;x<=W;x+=sz){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<=H;y+=sz){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  ctx.fillStyle='rgba(255,107,74,0.45)';
+  const offX=(t*.3)%sz,offY=(t*.2)%sz;
+  for(let x=-sz;x<=W+sz;x+=sz*4){for(let y=-sz;y<=H+sz;y+=sz*3){
+    const px=x+offX,py=y+offY,s=1.4+Math.sin(t*.02+x+y)*.7;
+    ctx.beginPath();ctx.arc(px,py,s,0,Math.PI*2);ctx.fill();
+  }}
+  t++;requestAnimationFrame(drawGrid);
+}
+drawGrid();
+
+/* CURSOR GLOW */
+const glow=document.getElementById('cursor-glow');
+document.addEventListener('mousemove',e=>{glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';});
+
+/* ═══ STATE ═══ */
+let appState={
+  user:null,provider:null,
+  scripts:[
+    {id:1,name:'PlayerHealth Module',cat:'Combat',code:'local Health={}\nfunction Health.new(max)\n  local self={max=max,cur=max}\n  return setmetatable(self,{__index=Health})\nend\nreturn Health'},
+    {id:2,name:'Coin Shop Handler',cat:'Economy',code:'local ShopService={}\nfunction ShopService.purchase(player,itemId)\n  local price=Items[itemId].price\n  if player.leaderstats.Coins.Value>=price then\n    player.leaderstats.Coins.Value-=price\n  end\nend'},
+    {id:3,name:'Mobile UI Detector',cat:'UI',code:'local UIS=game:GetService("UserInputService")\nif UIS.TouchEnabled then MobileUI.Enabled=true end'}
+  ],
+  checklist:[
+    {text:'Set game thumbnail & icon',sub:'1:1 ratio, high quality',done:false},
+    {text:'Configure game settings',sub:'Genre, max players, privacy',done:false},
+    {text:'Test on all platforms',sub:'PC, mobile, tablet, console',done:false},
+    {text:'Setup developer products',sub:'Robux monetization items',done:false},
+    {text:'Write game description',sub:'SEO-friendly, keyword rich',done:false},
+    {text:'Enable Team Create backups',sub:'Version history enabled',done:false},
+    {text:'Test anti-cheat systems',sub:'Sanity checks on server',done:false},
+    {text:'Configure badges',sub:'Engagement & achievement badges',done:false},
+    {text:'Social media announcement',sub:'Twitter, Discord, Reddit',done:false},
+    {text:'Setup DataStore',sub:'Player data persistence',done:false},
+    {text:'Playtest with 50+ players',sub:'Stress test the servers',done:false},
+    {text:'Set age recommendation',sub:'Appropriate content rating',done:false}
+  ],
+  tradeGive:[],tradeReceive:[],currentTradeSide:null,
+  robuxLog:[],robuxIn:0,robuxOut:0,
+  outfitSlots:{Head:'🎩',Face:'😊',Torso:'👕',Arms:'💪',Legs:'👖',Feet:'👟'},
+  savedPaletteColors:[],notifications:[
+    {icon:'🎮',text:'Your account checker result is ready.',time:'2m ago'},
+    {icon:'💎',text:'Valkyrie Helm increased in RAP by 3.2%.',time:'1h ago'},
+    {icon:'🔔',text:'New ORBYT feature: Trade Calculator launched!',time:'3h ago'}
+  ]
+};
+
+/* ═══ AUTH ═══ */
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='signin'?0:1)));
+  document.getElementById('auth-signin').classList.toggle('active',tab==='signin');
+  document.getElementById('auth-signup').classList.toggle('active',tab==='signup');
+}
+
+function doOAuth(provider){
+  // Show redirect notice then simulate OAuth completion
+  showToast(`Redirecting to ${provider} authorization page...`,'info');
+
+  // In a real app: redirect to provider OAuth URL
+  // Google: window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?...`
+  // Roblox: window.location.href = `https://apis.roblox.com/oauth/v1/authorize?...`
+
+  // Simulate OAuth callback after delay (demo mode)
+  setTimeout(()=>{
+    const demoNames={
+      Google:['DevUser_GG','CodeMaster99','RobloxBuilder'],
+      Roblox:['RblxDev_'+Math.floor(Math.random()*9999),'PixelBuild_'+Math.floor(Math.random()*999),'GameDev_'+Math.floor(Math.random()*9999)]
+    };
+    const name=demoNames[provider][Math.floor(Math.random()*3)];
+    appState.user=name;appState.provider=provider;
+
+    document.getElementById('user-name-display').textContent=name;
+    document.getElementById('user-avatar-init').textContent=name[0].toUpperCase();
+    document.getElementById('welcome-name').textContent=name;
+    document.getElementById('settings-avatar').textContent=name[0].toUpperCase();
+    document.getElementById('settings-name-display').textContent=name;
+    document.getElementById('settings-name').value=name;
+    document.getElementById('settings-provider-display').textContent='via '+provider;
+    document.getElementById('user-plan-display').textContent=provider==='Roblox'?'ROBLOX LINKED':'GOOGLE LINKED';
+    document.getElementById('connected-account-display').innerHTML=`<span style="color:var(--neon)">✓ Connected</span> — <strong>${name}</strong> via <strong>${provider}</strong>`;
+
+    const authPage=document.getElementById('page-auth');
+    authPage.style.transition='opacity .5s,transform .5s';
+    authPage.style.opacity='0';authPage.style.transform='scale(1.04)';
+    setTimeout(()=>{
+      authPage.classList.remove('active');
+      document.getElementById('page-app').classList.add('active');
+      initApp();
+      showToast(`Welcome, ${name}! Signed in via ${provider} 🎉`,'success');
+    },500);
+  },1200);
+}
+
+function logout(){
+  document.getElementById('page-app').classList.remove('active');
+  const ap=document.getElementById('page-auth');
+  ap.style.opacity='0';ap.style.transform='scale(0.96)';ap.classList.add('active');
+  requestAnimationFrame(()=>{ap.style.transition='opacity .5s,transform .5s';ap.style.opacity='1';ap.style.transform='scale(1)';});
+  appState.user=null;appState.provider=null;
+}
+
+/* ═══ SIDEBAR MOBILE ═══ */
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+
+/* ═══ NAVIGATION ═══ */
+const panelTitles={
+  dashboard:'Dashboard','account-checker':'Account Checker',inventory:'Inventory Viewer',
+  friends:'Friends List',groups:'Groups','game-search':'Game Search',badges:'Badges',
+  limiteds:'Limited Tracker',scripts:'Script Vault',economy:'Economy Simulator',
+  robux:'Robux Converter','robux-tracker':'Robux Tracker','trade-calc':'Trade Calculator',
+  outfit:'Outfit Builder',usernames:'Username Checker',pitch:'Pitch Generator',
+  changelog:'Changelog Builder',checklist:'Launch Checklist','experience-builder':'Experience Builder',
+  'color-palette':'Color Palette',notifications:'Notifications',settings:'Settings'
+};
+
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    const panel=item.dataset.panel;
+    if(panel){navigate(panel);if(window.innerWidth<=768)toggleSidebar();}
+  });
+});
+
+function navigate(panel){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector(`[data-panel="${panel}"]`)?.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('panel-'+panel);
+  if(el)el.classList.add('active');
+  document.getElementById('topbar-title').textContent=panelTitles[panel]||panel;
+}
+
+/* ═══ INIT ═══ */
+function initApp(){
+  renderActivity();renderScripts();renderChecklist();initEconChart();updateEcon();
+  convertRobux();renderQuickRef();renderLimiteds();renderNotifications();renderOutfitSlots();
+  renderBrickColors();renderRobuxLog();renderTradeItems();
+}
+
+/* ═══ ACTIVITY ═══ */
+const activities=[
+  {text:'Account linked via OAuth',time:'just now',color:'#4affb4'},
+  {text:'Script Vault initialized with 3 scripts',time:'just now',color:'#4a9fff'},
+  {text:'Limited Tracker updated',time:'1h ago',color:'#ffb347'},
+  {text:'New Changelog Builder feature',time:'2h ago',color:'#a47fff'},
+  {text:'Economy Simulator loaded',time:'3h ago',color:'#ff6b4a'}
+];
+function renderActivity(){
+  document.getElementById('activity-feed').innerHTML=activities.map(a=>`
+    <div class="activity-item"><div class="activity-dot" style="background:${a.color}"></div><div class="activity-text">${a.text}</div><div class="activity-time">${a.time}</div></div>
+  `).join('');
+}
+
+/* ═══ ROBLOX API HELPERS (with CORS-friendly proxy note) ═══ */
+// Note: Direct Roblox API calls require CORS proxying in production.
+// These functions simulate realistic data based on the public Roblox API structure.
+// API endpoints used: apis.roblox.com/users, api.roblox.com/users
+
+function checkRobloxAccount(){
+  const input=document.getElementById('rblx-username-input').value.trim();
+  if(!input){showToast('Enter a username or user ID','warn');return;}
+  showToast('Fetching Roblox data...','info');
+
+  // Simulate realistic Roblox API response
+  setTimeout(()=>{
+    const isNumeric=/^\d+$/.test(input);
+    const userId=isNumeric?input:Math.floor(Math.random()*900000000+100000);
+    const username=isNumeric?'RobloxUser'+userId:input;
+    const accountAge=Math.floor(Math.random()*4000+365);
+    const friends=Math.floor(Math.random()*150+10);
+    const followers=Math.floor(Math.random()*5000+50);
+    const following=Math.floor(Math.random()*200+5);
+    const rap=Math.floor(Math.random()*200000);
+    const premiumUser=Math.random()>0.5;
+    const verified=Math.random()>0.7;
+
+    document.getElementById('account-result').style.display='block';
+    document.getElementById('profile-name').textContent=username;
+    document.getElementById('profile-handle').textContent='@'+username.toLowerCase()+' · ID: '+userId;
+    document.getElementById('profile-avatar').textContent='🎮';
+    document.getElementById('profile-desc').textContent=`This is ${username}'s Roblox profile. Account joined ${accountAge} days ago.`+(premiumUser?' Premium subscriber.':'');
+
+    const tags=[];
+    if(premiumUser)tags.push('<span class="tag tag-amber">⭐ Premium</span>');
+    if(verified)tags.push('<span class="tag tag-blue">✓ Verified</span>');
+    if(accountAge>1000)tags.push('<span class="tag tag-neon">🏅 Veteran</span>');
+    document.getElementById('profile-tags').innerHTML=tags.join('');
+
+    const yearJoined=new Date().getFullYear()-Math.floor(accountAge/365);
+    document.getElementById('value-grid').innerHTML=`
+      <div class="value-item"><div class="value-num">${friends}</div><div class="value-lbl">Friends</div></div>
+      <div class="value-item"><div class="value-num">${followers.toLocaleString()}</div><div class="value-lbl">Followers</div></div>
+      <div class="value-item"><div class="value-num">${following.toLocaleString()}</div><div class="value-lbl">Following</div></div>
+      <div class="value-item"><div class="value-num">${accountAge}d</div><div class="value-lbl">Acc. Age</div></div>
+      <div class="value-item"><div class="value-num">${yearJoined}</div><div class="value-lbl">Joined</div></div>
+      <div class="value-item"><div class="value-num">R$ ${rap.toLocaleString()}</div><div class="value-lbl">RAP</div></div>
+    `;
+
+    const estValue=rap+(accountAge*10)+(premiumUser?50000:0)+(verified?25000:0);
+    document.getElementById('value-estimate').innerHTML=`
+      <div class="stat-card" style="--accent-color:var(--amber);flex:1;min-width:120px">
+        <div class="stat-value" style="font-size:20px">R$ ${estValue.toLocaleString()}</div>
+        <div class="stat-label">Est. Account Value</div>
+        <div class="stat-change up">Based on RAP + age</div>
+      </div>
+      <div class="stat-card" style="--accent-color:var(--neon);flex:1;min-width:120px">
+        <div class="stat-value" style="font-size:20px">${accountAge>1825?'🥇':accountAge>730?'🥈':'🥉'} Tier ${accountAge>1825?'S':accountAge>730?'A':'B'}</div>
+        <div class="stat-label">Account Tier</div>
+        <div class="stat-change up">${accountAge>1825?'Veteran account':'Active account'}</div>
+      </div>
+    `;
+    document.getElementById('d-robux').textContent='R$ '+rap.toLocaleString();
+    document.getElementById('d-friends').textContent=friends;
+    showToast('Account data loaded! (demo)','success');
+  },1000);
+}
+
+function checkInventory(){
+  const input=document.getElementById('inv-username-input').value.trim();
+  if(!input){showToast('Enter a username','warn');return;}
+  showToast('Fetching inventory...','info');
+  setTimeout(()=>{
+    const items=[
+      {icon:'🎩',name:'Clockwork Headphones',price:'R$ 800',type:'Hat'},
+      {icon:'⚔️',name:'Linked Sword',price:'Free',type:'Gear'},
+      {icon:'👑',name:'Domino Crown',price:'R$ 13,337',type:'Hat'},
+      {icon:'🦋',name:'Butterfly Wings',price:'R$ 250',type:'Wings'},
+      {icon:'🎭',name:'Admin Crown',price:'Limited',type:'Hat'},
+      {icon:'🌟',name:'Golden Superball',price:'R$ 35',type:'Gear'},
+      {icon:'🐉',name:'Dragon Wings',price:'R$ 1,200',type:'Wings'},
+      {icon:'💎',name:'Valkyrie Helm',price:'R$ 45K+',type:'Hat'},
+      {icon:'🔮',name:'Sparkle Time Fedora',price:'R$ 12K+',type:'Hat'},
+      {icon:'🎪',name:'Clown Hat',price:'R$ 50',type:'Hat'},
+      {icon:'🚀',name:'Rocket Launcher',price:'R$ 500',type:'Gear'},
+      {icon:'🌈',name:'Rainbow Wings',price:'R$ 850',type:'Wings'},
+    ];
+    const count=Math.floor(Math.random()*50+10)+items.length;
+    document.getElementById('inventory-result').style.display='block';
+    document.getElementById('inv-title').textContent=input+"'s Inventory";
+    document.getElementById('inv-count').textContent=`SHOWING ${items.length} OF ${count} ITEMS (PUBLIC)`;
+    document.getElementById('inv-filters').innerHTML=`
+      <span class="tag tag-coral" style="cursor:pointer" onclick="showToast('Filter: All','info')">All</span>
+      <span class="tag tag-neon" style="cursor:pointer" onclick="showToast('Filter: Hats','info')">Hats</span>
+      <span class="tag tag-blue" style="cursor:pointer" onclick="showToast('Filter: Gear','info')">Gear</span>
+      <span class="tag tag-amber" style="cursor:pointer" onclick="showToast('Filter: Wings','info')">Wings</span>
+    `;
+    document.getElementById('inventory-grid').innerHTML=items.map(it=>`
+      <div class="inv-item" title="${it.name}"><span class="inv-item-icon">${it.icon}</span><div class="inv-item-name">${it.name}</div><div class="inv-item-price">${it.price}</div></div>
+    `).join('');
+    document.getElementById('d-items').textContent=count;
+    showToast('Inventory loaded! (public items shown)','success');
+  },900);
+}
+
+function checkFriends(){
+  const input=document.getElementById('friends-username-input').value.trim();
+  if(!input){showToast('Enter a username','warn');return;}
+  showToast('Fetching friends...','info');
+  setTimeout(()=>{
+    const names=['DevBro','PixelHero','CoolGamer99','SkillMaster','RobloxPro','NightOwl','SpeedRunner','CodeWizard','LegendaryDev','UGCKing'];
+    const friends=names.slice(0,6).map(n=>({name:n,online:Math.random()>0.5,init:n[0]}));
+    document.getElementById('friends-result').style.display='block';
+    document.getElementById('friends-grid').innerHTML=friends.map(f=>`
+      <div class="friend-item">
+        <div class="friend-avatar">${f.init}</div>
+        <div class="friend-name">${f.name}</div>
+        <span class="tag ${f.online?'tag-neon':'tag-amber'}" style="font-size:9px">${f.online?'ONLINE':'OFFLINE'}</span>
+      </div>
+    `).join('');
+    document.getElementById('d-friends').textContent=friends.length;
+    showToast(`Loaded ${friends.length} friends (demo)`,'success');
+  },800);
+}
+
+function checkGroups(){
+  const input=document.getElementById('groups-username-input').value.trim();
+  if(!input){showToast('Enter a username','warn');return;}
+  showToast('Fetching groups...','info');
+  setTimeout(()=>{
+    const groups=[
+      {icon:'⚔️',name:'Elite Developers Guild',role:'Senior Member',members:'12.4K'},
+      {icon:'🚀',name:'Space Game Studio',role:'Owner',members:'834'},
+      {icon:'💎',name:'Limited Traders Community',role:'Trader',members:'45.2K'},
+      {icon:'🎮',name:'Roblox Fan Club',role:'Member',members:'1.2M'},
+    ];
+    document.getElementById('groups-result').style.display='block';
+    document.getElementById('groups-list').innerHTML=groups.map(g=>`
+      <div class="group-item"><div class="group-icon">${g.icon}</div><div><div class="group-name">${g.name}</div><div class="group-role">${g.role} · ${g.members} members</div></div></div>
+    `).join('');
+    document.getElementById('d-groups').textContent=groups.length;
+    showToast('Groups loaded! (demo)','success');
+  },800);
+}
+
+function searchGames(){
+  const q=document.getElementById('game-search-input').value.trim();
+  if(!q){showToast('Enter a game name','warn');return;}
+  showToast('Searching games...','info');
+  setTimeout(()=>{
+    const results=[
+      {icon:'🐾',name:'Adopt Me!',players:'328,412',visits:'35B',rating:'92%'},
+      {icon:'⚔️',name:'Blox Fruits',players:'189,234',visits:'18B',rating:'88%'},
+      {icon:'🏋️',name:'Lifting Simulator',players:'45,100',visits:'2B',rating:'84%'},
+      {icon:'🎮',name:q+' Experience',players:'1,234',visits:'45M',rating:'78%'},
+    ];
+    document.getElementById('game-search-result').innerHTML=results.map(g=>`
+      <div class="game-result">
+        <div class="game-thumb-sm">${g.icon}</div>
+        <div><div class="game-result-name">${g.name}</div><div class="game-result-stats">👥 ${g.players} playing · 👁 ${g.visits} visits · ⭐ ${g.rating}</div></div>
+        <button class="btn btn-ghost" style="font-size:10px;padding:6px 10px" onclick="showToast('Opening on Roblox...','info')">Open</button>
+      </div>
+    `).join('');
+    showToast(`Found ${results.length} results for "${q}"`,'success');
+  },700);
+}
+
+function checkBadges(){
+  const input=document.getElementById('badges-username-input').value.trim();
+  if(!input){showToast('Enter a username','warn');return;}
+  showToast('Fetching badges...','info');
+  setTimeout(()=>{
+    const badges=[
+      {icon:'🏆',name:'Welcome to the Club',game:'Roblox'},
+      {icon:'⚔️',name:'Sword Master',game:'Sword Fight'},
+      {icon:'🚀',name:'Speed Demon',game:'Vehicle Sim'},
+      {icon:'💎',name:'Diamond Collector',game:'Mining Sim'},
+      {icon:'👻',name:'Survived the Night',game:'Horror Game'},
+      {icon:'🌟',name:'All Stars',game:'Sports Game'},
+      {icon:'🎯',name:'Sharpshooter',game:'Military Sim'},
+      {icon:'🦅',name:'Sky High',game:'Plane Crazy'},
+    ];
+    document.getElementById('badges-result').style.display='block';
+    document.getElementById('badges-grid').innerHTML=badges.map(b=>`
+      <div class="badge-item"><span class="badge-icon">${b.icon}</span><div class="badge-name">${b.name}</div><div style="font-size:9px;color:var(--text3);margin-top:2px">${b.game}</div></div>
+    `).join('');
+    showToast(`Loaded ${badges.length} badges (demo)`,'success');
+  },800);
+}
+
+/* ═══ LIMITEDS ═══ */
+const limitedsData=[
+  {name:'Valkyrie Helm',rap:'R$ 45,200',change:'+3.2%',up:true},
+  {name:'Domino Crown',rap:'R$ 38,500',change:'+1.1%',up:true},
+  {name:'Sparkle Time Fedora',rap:'R$ 12,300',change:'-0.4%',up:false},
+  {name:'Clockwork Headphones',rap:'R$ 8,700',change:'+0.8%',up:true},
+  {name:'Pearlescent Tiara',rap:'R$ 22,100',change:'+5.5%',up:true},
+  {name:'Chrome Dino',rap:'R$ 5,600',change:'-1.2%',up:false},
+];
+function renderLimiteds(){
+  document.getElementById('limiteds-list').innerHTML=limitedsData.map(l=>`
+    <div class="limited-row">
+      <span style="font-size:18px">💎</span>
+      <span class="limited-name">${l.name}</span>
+      <span class="limited-val">${l.rap}</span>
+      <span class="limited-change ${l.up?'up':'dn'}">${l.change}</span>
+    </div>
+  `).join('');
+}
+
+function searchLimited(){
+  const q=document.getElementById('limited-search-input').value.trim();
+  if(!q){showToast('Enter an item name','warn');return;}
+  const rap=Math.floor(Math.random()*100000+1000);
+  const change=(Math.random()>0.5?'+':'-')+(Math.random()*5).toFixed(1)+'%';
+  document.getElementById('limited-search-result').innerHTML=`
+    <div class="limited-row" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px">
+      <span style="font-size:22px">💎</span>
+      <div><div class="limited-name" style="font-size:13px;font-weight:600">${q}</div><div style="font-size:10px;color:var(--text3)">Limited U</div></div>
+      <div style="text-align:right"><div class="limited-val" style="font-size:14px">R$ ${rap.toLocaleString()}</div><div class="limited-change ${change.startsWith('+')?'up':'dn'}">${change}</div></div>
+    </div>
+  `;
+  showToast('Limited data fetched! (demo)','success');
+}
+
+/* ═══ SCRIPTS ═══ */
+function renderScripts(filter='all'){
+  const list=document.getElementById('scripts-list');
+  const items=filter==='all'?appState.scripts:appState.scripts.filter(s=>s.cat===filter);
+  const tagClass={UI:'tag-neon',Combat:'tag-coral',Economy:'tag-amber',Utility:'tag-blue',Other:'tag-blue'};
+  list.innerHTML=items.map(s=>`
+    <div class="script-item">
+      <div class="script-header">
+        <div class="script-title">${s.name}</div>
+        <span class="tag ${tagClass[s.cat]||'tag-blue'}">${s.cat}</span>
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px" onclick="copyScript(${s.id})">📋</button>
+        <span style="cursor:pointer;font-size:14px" onclick="deleteScript(${s.id})">🗑</span>
+      </div>
+      <div class="script-code">${escHtml(s.code)}</div>
+    </div>
+  `).join('')||'<div style="color:var(--text3);font-size:12px">No scripts in this category.</div>';
+}
+function filterScripts(cat){renderScripts(cat);}
+function openScriptModal(){openModal('script-modal');}
+function saveScript(){
+  const name=document.getElementById('sc-name').value.trim();
+  const cat=document.getElementById('sc-cat').value;
+  const code=document.getElementById('sc-code').value.trim();
+  if(!name||!code){showToast('Name and code are required','warn');return;}
+  appState.scripts.unshift({id:Date.now(),name,cat,code});
+  renderScripts();closeModal('script-modal');
+  document.getElementById('sc-name').value='';document.getElementById('sc-code').value='';
+  showToast('Script saved! 📝','success');
+}
+function deleteScript(id){appState.scripts=appState.scripts.filter(s=>s.id!==id);renderScripts();showToast('Script deleted','info');}
+function copyScript(id){const s=appState.scripts.find(x=>x.id===id);if(s)navigator.clipboard.writeText(s.code).then(()=>showToast('Copied!','success'));}
+
+/* ═══ ECONOMY ═══ */
+let econChart=null;
+function initEconChart(){
+  const cvs=document.getElementById('econ-chart');
+  if(!cvs)return;
+  const c=cvs.getContext('2d');
+  cvs.width=cvs.offsetWidth*2;cvs.height=320;
+  econChart={canvas:cvs,ctx:c};
+}
+function updateEcon(){
+  const price=+document.getElementById('r-price').value;
+  const drop=+document.getElementById('r-drop').value/100;
+  const dau=+document.getElementById('r-dau').value;
+  const conv=+document.getElementById('r-conv').value/100;
+  document.getElementById('v-price').textContent='R$ '+price;
+  document.getElementById('v-drop').textContent=Math.round(drop*100)+'%';
+  document.getElementById('v-dau').textContent=dau.toLocaleString();
+  document.getElementById('v-conv').textContent=Math.round(conv*100)+'%';
+  const daily=Math.round(dau*conv*price);
+  const monthly=daily*30;
+  document.getElementById('est-revenue').textContent='R$ '+daily.toLocaleString();
+  document.getElementById('est-monthly').textContent='R$ '+monthly.toLocaleString();
+  if(econChart){drawEconChart(price,drop,dau,conv);}
+}
+function drawEconChart(price,drop,dau,conv){
+  const{ctx,canvas}=econChart;
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const data=Array.from({length:30},(_,i)=>{
+    const variance=0.85+Math.random()*.3;
+    return Math.round(dau*conv*price*variance*(1+i*.02));
+  });
+  const max=Math.max(...data);
+  ctx.strokeStyle='rgba(37,42,58,0.5)';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=H*.1+i*(H*.8)/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(255,107,74,0.3)');grad.addColorStop(1,'rgba(255,107,74,0)');
+  ctx.beginPath();
+  data.forEach((v,i)=>{const x=i*(W/(data.length-1));const y=H*.9-(v/max)*(H*.8);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(W,H*.9);ctx.lineTo(0,H*.9);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();ctx.strokeStyle='rgba(255,107,74,0.8)';ctx.lineWidth=2.5;
+  data.forEach((v,i)=>{const x=i*(W/(data.length-1));const y=H*.9-(v/max)*(H*.8);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+}
+
+/* ═══ ROBUX CONVERTER ═══ */
+const ROBUX_RATE=0.0035;
+function convertRobux(){
+  const amount=+document.getElementById('robux-amount').value||0;
+  const dir=document.getElementById('robux-dir').value;
+  if(dir==='to_usd'){
+    const res=(amount*ROBUX_RATE).toFixed(2);
+    const af=(res*.7).toFixed(2);
+    document.getElementById('conv-result').textContent='$'+res;
+    document.getElementById('conv-label').textContent='US DOLLARS';
+    document.getElementById('conv-after-fee').textContent='$'+af;
+  }else{
+    const res=Math.round(amount/ROBUX_RATE);
+    document.getElementById('conv-result').textContent='R$ '+res.toLocaleString();
+    document.getElementById('conv-label').textContent='ROBUX';
+    document.getElementById('conv-after-fee').textContent='R$ '+Math.round(res*.7).toLocaleString();
+  }
+}
+function renderQuickRef(){
+  const refs=[100,500,1000,2500,5000,10000];
+  document.getElementById('quick-ref').innerHTML=refs.map(r=>`
+    <div style="display:flex;justify-content:space-between;padding:7px 10px;background:var(--bg3);border-radius:7px;border:1px solid var(--border)">
+      <span style="color:var(--amber)">R$ ${r.toLocaleString()}</span>
+      <span style="color:var(--text3)">→</span>
+      <span style="color:var(--neon)">$${(r*ROBUX_RATE).toFixed(2)}</span>
+      <span style="color:var(--text3);font-size:10px">(fee: $${(r*ROBUX_RATE*.7).toFixed(2)})</span>
+    </div>
+  `).join('');
+}
+
+/* ═══ ROBUX TRACKER ═══ */
+function renderRobuxLog(){
+  const log=appState.robuxLog;
+  document.getElementById('robux-log').innerHTML=log.length?log.map(e=>`
+    <div class="robux-entry">
+      <div class="robux-type" style="background:${e.type==='earned'?'var(--neon)':'var(--coral)'}"></div>
+      <div class="robux-desc">${e.desc}</div>
+      <div class="robux-amount" style="color:${e.type==='earned'?'var(--neon)':'var(--coral)'}">${e.type==='earned'?'+':'-'}R$ ${e.amount.toLocaleString()}</div>
+    </div>
+  `).join(''):'<div style="color:var(--text3);font-size:12px;padding:8px 0">No transactions logged yet. Click + Add Entry.</div>';
+}
+function addRobuxEntry(){openModal('robux-modal');}
+function confirmRobuxEntry(){
+  const type=document.getElementById('rt-type').value;
+  const amount=+document.getElementById('rt-amount').value||0;
+  const desc=document.getElementById('rt-desc').value.trim()||'Transaction';
+  if(!amount){showToast('Enter an amount','warn');return;}
+  appState.robuxLog.unshift({type,amount,desc});
+  if(type==='earned')appState.robuxIn+=amount;else appState.robuxOut+=amount;
+  document.getElementById('rt-total-in').textContent='R$ '+appState.robuxIn.toLocaleString();
+  document.getElementById('rt-total-out').textContent='R$ '+appState.robuxOut.toLocaleString();
+  renderRobuxLog();closeModal('robux-modal');
+  document.getElementById('rt-amount').value='';document.getElementById('rt-desc').value='';
+  showToast('Transaction logged!','success');
+}
+
+/* ═══ TRADE CALCULATOR ═══ */
+function renderTradeItems(){
+  const gi=document.getElementById('give-items');
+  const ri=document.getElementById('receive-items');
+  if(appState.tradeGive.length){
+    gi.innerHTML=appState.tradeGive.map((it,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;flex:1">${it.name}</span>
+        <span style="color:var(--amber);font-size:11px">R$ ${it.rap.toLocaleString()}</span>
+        <span style="cursor:pointer;font-size:12px;color:var(--coral)" onclick="removeTradeItem('give',${i})">✕</span>
+      </div>`).join('');
+  }else gi.innerHTML='<div style="color:var(--text3);font-size:12px">No items added</div>';
+  if(appState.tradeReceive.length){
+    ri.innerHTML=appState.tradeReceive.map((it,i)=>`
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:12px;flex:1">${it.name}</span>
+        <span style="color:var(--amber);font-size:11px">R$ ${it.rap.toLocaleString()}</span>
+        <span style="cursor:pointer;font-size:12px;color:var(--coral)" onclick="removeTradeItem('receive',${i})">✕</span>
+      </div>`).join('');
+  }else ri.innerHTML='<div style="color:var(--text3);font-size:12px">No items added</div>';
+  const giveTotal=appState.tradeGive.reduce((a,it)=>a+it.rap,0);
+  const recTotal=appState.tradeReceive.reduce((a,it)=>a+it.rap,0);
+  document.getElementById('give-rap').textContent='R$ '+giveTotal.toLocaleString();
+  document.getElementById('receive-rap').textContent='R$ '+recTotal.toLocaleString();
+}
+function addTradeItem(side){appState.currentTradeSide=side;openModal('trade-modal');}
+function confirmAddTradeItem(){
+  const name=document.getElementById('trade-item-name').value.trim();
+  const rap=+document.getElementById('trade-item-rap').value||0;
+  if(!name||!rap){showToast('Enter item name and RAP value','warn');return;}
+  if(appState.currentTradeSide==='give')appState.tradeGive.push({name,rap});
+  else appState.tradeReceive.push({name,rap});
+  renderTradeItems();closeModal('trade-modal');
+  document.getElementById('trade-item-name').value='';document.getElementById('trade-item-rap').value='';
+}
+function removeTradeItem(side,i){
+  if(side==='give')appState.tradeGive.splice(i,1);else appState.tradeReceive.splice(i,1);
+  renderTradeItems();
+}
+function evaluateTrade(){
+  const g=appState.tradeGive.reduce((a,it)=>a+it.rap,0);
+  const r=appState.tradeReceive.reduce((a,it)=>a+it.rap,0);
+  if(!g&&!r){showToast('Add items first','warn');return;}
+  const diff=r-g;const pct=g?((diff/g)*100).toFixed(1):100;
+  const good=diff>=0;
+  document.getElementById('verdict-text').innerHTML=good?`<span style="color:var(--neon)">✅ Good Trade!</span>`:`<span style="color:var(--coral)">⚠️ Losing Trade</span>`;
+  document.getElementById('verdict-sub').textContent=`You ${good?'gain':'lose'} R$ ${Math.abs(diff).toLocaleString()} (${Math.abs(pct)}% ${good?'profit':'loss'})`;
+}
+
+/* ═══ OUTFIT BUILDER ═══ */
+const outfitEmojis={Head:['🎩','👑','⛑️','🪖','🧢'],Face:['😊','😎','😈','🤖','👽'],Torso:['👕','🎽','🧥','👔','🦺'],Arms:['💪','🦾','⚡','❄️','🔥'],Legs:['👖','🩱','🩲','👗','🧦'],Feet:['👟','👠','👢','🥾','🩴']};
+function renderOutfitSlots(){
+  document.getElementById('outfit-slots').innerHTML=Object.keys(appState.outfitSlots).map(slot=>`
+    <div class="outfit-slot" onclick="cycleOutfitSlot('${slot}')">
+      <div class="outfit-slot-icon">${appState.outfitSlots[slot]}</div>
+      <div class="outfit-slot-label">${slot}</div>
+    </div>
+  `).join('');
+  updateOutfitPreview();
+}
+function cycleOutfitSlot(slot){
+  const emojis=outfitEmojis[slot];
+  const cur=emojis.indexOf(appState.outfitSlots[slot]);
+  appState.outfitSlots[slot]=emojis[(cur+1)%emojis.length];
+  renderOutfitSlots();
+}
+function updateOutfitPreview(){
+  const s=appState.outfitSlots;
+  document.getElementById('outfit-preview').textContent=s.Torso;
+  document.getElementById('outfit-summary').innerHTML=Object.entries(s).map(([k,v])=>`
+    <div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0">
+      <span style="color:var(--text3)">${k}</span><span>${v}</span>
+    </div>
+  `).join('');
+}
+function saveOutfit(){showToast('Outfit saved! 💾','success');}
+
+/* ═══ USERNAME CHECKER ═══ */
+function checkUsernames(){
+  const raw=document.getElementById('username-input').value;
+  const names=raw.split(/[\n,]+/).map(s=>s.trim()).filter(Boolean);
+  if(!names.length){showToast('Enter at least one username','warn');return;}
+  const container=document.getElementById('username-results');
+  container.innerHTML='<div class="spinner" style="margin:14px 0"></div>';
+  setTimeout(()=>{
+    container.innerHTML=names.map(name=>{
+      const avail=name.length>8&&Math.random()>.4;
+      return `
+        <div class="username-result ${avail?'available':'taken'}">
+          <span style="font-size:16px">${avail?'✅':'❌'}</span>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;flex:1">${name}</span>
+          <span style="font-size:10px;letter-spacing:1px">${avail?'AVAILABLE':'TAKEN'}</span>
+          ${avail?`<button class="btn btn-neon" style="padding:4px 9px;font-size:10px" onclick="showToast('Open Roblox to claim!','info')">Claim</button>`:''}
+        </div>`;
+    }).join('');
+    showToast(`Checked ${names.length} username${names.length>1?'s':''}`,'info');
+  },1000);
+}
+
+/* ═══ PITCH GENERATOR ═══ */
+function generatePitch(){
+  const genre=document.getElementById('pitch-genre').value;
+  const mechanic=document.getElementById('pitch-mechanic').value||'core gameplay';
+  const audience=document.getElementById('pitch-audience').value;
+  const mono=document.getElementById('pitch-mono').value;
+  const gameName=mechanic?mechanic.split(' ').map(w=>w[0].toUpperCase()+w.slice(1)).join('')+' '+genre.split('/')[0].trim():'My Game';
+  const btn=document.getElementById('pitch-btn');
+  btn.innerHTML='<div class="spinner" style="width:14px;height:14px"></div> Generating...';
+  btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('pitch-output').innerHTML=`
+      <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">OVERVIEW</div>
+      <div style="margin-bottom:14px">${gameName} is an action-packed <strong style="color:var(--coral)">${genre}</strong> experience centered around <strong style="color:var(--text)">${mechanic}</strong> mechanics. Designed for <strong style="color:var(--text)">${audience}</strong>, the game delivers high-retention gameplay loops with deep progression systems.</div>
+      <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">CORE LOOP</div>
+      <div style="margin-bottom:14px;color:var(--text2)">→ Enter world → Complete objectives → Earn rewards → Upgrade → Unlock areas → Repeat</div>
+      <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">MONETIZATION</div>
+      <div style="margin-bottom:14px;color:var(--text2)">Primary: <strong style="color:var(--text)">${mono}</strong> — premium items, XP boosts, cosmetics (no pay-to-win).</div>
+      <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">SUCCESS METRICS</div>
+      <div style="color:var(--text2)">Target D1 Retention: 40%+ · D7: 20%+ · ARPDAU: R$8+</div>
+    `;
+    document.getElementById('pitch-actions').style.display='flex';
+    btn.innerHTML='✨ Generate Pitch Doc';btn.disabled=false;
+    showToast('Pitch generated! 🚀','success');
+  },1600);
+}
+function copyPitch(){navigator.clipboard.writeText(document.getElementById('pitch-output').innerText).then(()=>showToast('Copied!','success'));}
+
+/* ═══ CHANGELOG ═══ */
+function buildChangelog(){
+  const version=document.getElementById('cl-version').value||'v1.0.0';
+  const features=document.getElementById('cl-features').value.trim().split('\n').filter(Boolean);
+  const fixes=document.getElementById('cl-fixes').value.trim().split('\n').filter(Boolean);
+  const removed=document.getElementById('cl-removed').value.trim().split('\n').filter(Boolean);
+  const now=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('changelog-preview').innerHTML=`
+    <div class="changelog-version">${version}</div><div class="changelog-date">${now}</div>
+    ${features.length?`<div class="changelog-section">✨ New Features</div>${features.map(f=>`<div class="changelog-line">${f}</div>`).join('')}`:''}
+    ${fixes.length?`<div class="changelog-section">🐛 Bug Fixes</div>${fixes.map(f=>`<div class="changelog-line">${f}</div>`).join('')}`:''}
+    ${removed.length?`<div class="changelog-section">🗑 Removed</div>${removed.map(f=>`<div class="changelog-line">${f}</div>`).join('')}`:''}
+  `;
+  showToast('Changelog built! 📋','success');
+}
+function copyChangelog(){navigator.clipboard.writeText(document.getElementById('changelog-preview').innerText).then(()=>showToast('Copied!','success'));}
+
+/* ═══ CHECKLIST ═══ */
+function renderChecklist(){
+  document.getElementById('checklist-items').innerHTML=appState.checklist.map((item,i)=>`
+    <div class="checklist-item ${item.done?'done':''}" onclick="toggleCheck(${i})">
+      <div class="check-box">${item.done?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#000" stroke-width="2.5"><polyline points="2,6 5,9 10,3"/></svg>':''}</div>
+      <div><div class="check-text">${item.text}</div><div class="check-sub">${item.sub}</div></div>
+    </div>
+  `).join('');
+  updateCheckProgress();
+}
+function toggleCheck(i){appState.checklist[i].done=!appState.checklist[i].done;renderChecklist();if(appState.checklist[i].done)showToast(appState.checklist[i].text+' ✓','success');}
+function updateCheckProgress(){
+  const done=appState.checklist.filter(x=>x.done).length;
+  const total=appState.checklist.length;
+  const pct=Math.round((done/total)*100);
+  document.getElementById('check-progress-bar').style.width=pct+'%';
+  document.getElementById('check-progress-text').textContent=`${done} / ${total} Complete`;
+  if(done===total)showToast('🎉 All launch checks complete!','success');
+}
+
+/* ═══ EXPERIENCE BUILDER ═══ */
+function toggleExpTag(el){el.classList.toggle('sel');}
+function buildExperience(){
+  const name=document.getElementById('exp-name').value||'My Game';
+  const tags=[...document.querySelectorAll('.exp-tag.sel')].map(t=>t.textContent);
+  const players=document.getElementById('exp-players').value;
+  const loop=document.getElementById('exp-loop').value||'Core gameplay loop';
+  const usp=document.getElementById('exp-usp').value||'Unique feature';
+  document.getElementById('exp-output').innerHTML=`
+    <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">GAME NAME</div>
+    <div style="margin-bottom:14px;font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--coral)">${name}</div>
+    <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">GENRES</div>
+    <div style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:5px">${tags.map(t=>`<span class="tag tag-coral">${t}</span>`).join('')||'<span style="color:var(--text3)">No genres selected</span>'}</div>
+    <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">PLAYER COUNT</div>
+    <div style="margin-bottom:14px;color:var(--text2)">${players}</div>
+    <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">CORE LOOP</div>
+    <div style="margin-bottom:14px;color:var(--text2)">${loop}</div>
+    <div style="color:var(--amber);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">UNIQUE SELLING POINT</div>
+    <div style="color:var(--text2)">${usp}</div>
+  `;
+  showToast('Game plan generated! 🚀','success');
+}
+
+/* ═══ COLOR PALETTE ═══ */
+const brickColors=[
+  {name:'Bright Red',hex:'#c4281c',num:21},
+  {name:'Bright Blue',hex:'#0d69ac',num:23},
+  {name:'Bright Yellow',hex:'#f5cd2f',num:24},
+  {name:'Bright Green',hex:'#4b974a',num:37},
+  {name:'White',hex:'#f2f3f2',num:1},
+  {name:'Black',hex:'#1b2a34',num:26},
+  {name:'Reddish Brown',hex:'#82422a',num:192},
+  {name:'Dark Orange',hex:'#c8542d',num:225},
+  {name:'Medium Stone Grey',hex:'#9b9da0',num:194},
+  {name:'Sand Green',hex:'#708e7c',num:151},
+  {name:'Purple',hex:'#8121c0',num:268},
+  {name:'Cyan',hex:'#0fc4c9',num:107},
+];
+function renderBrickColors(){
+  document.getElementById('brick-colors').innerHTML=brickColors.map(bc=>`
+    <div class="palette-swatch" style="background:${bc.hex}" title="${bc.name} (${bc.num})" onclick="selectBrickColor('${bc.hex}','${bc.name}',${bc.num})"></div>
+  `).join('');
+}
+function selectBrickColor(hex,name,num){
+  document.getElementById('bc-result').style.display='block';
+  document.getElementById('bc-preview').style.background=hex;
+  document.getElementById('bc-name').textContent=name;
+  document.getElementById('bc-hex').textContent='HEX: '+hex.toUpperCase();
+  document.getElementById('bc-num').textContent='BrickColor ID: '+num;
+  document.getElementById('bc-lua').textContent=`BrickColor.new("${name}")`;
+}
+function lookupBrickColor(){
+  const q=document.getElementById('bc-search').value.trim().toLowerCase();
+  const found=brickColors.find(bc=>bc.name.toLowerCase().includes(q)||String(bc.num)===q);
+  if(found)selectBrickColor(found.hex,found.name,found.num);
+  else showToast('BrickColor not found','warn');
+}
+function generatePalette(){
+  const hex=document.getElementById('base-color').value;
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  const shades=[-40,-20,0,20,40];
+  const clamp=v=>Math.min(255,Math.max(0,v));
+  const toHex=v=>v.toString(16).padStart(2,'0');
+  document.getElementById('generated-palette').innerHTML=shades.map(s=>{
+    const nr=clamp(r+s),ng=clamp(g+s),nb=clamp(b+s);
+    const h='#'+toHex(nr)+toHex(ng)+toHex(nb);
+    return `<div class="palette-swatch" style="background:${h}" title="${h}" onclick="addToSavedPalette('${h}')"></div>`;
+  }).join('');
+}
+function addToSavedPalette(hex){
+  if(appState.savedPaletteColors.includes(hex)){showToast('Already in palette','warn');return;}
+  appState.savedPaletteColors.push(hex);
+  document.getElementById('saved-palette').innerHTML=appState.savedPaletteColors.map(c=>`
+    <div class="palette-swatch" style="background:${c}" title="${c}"></div>
+  `).join('');
+  showToast('Added to palette!','success');
+}
+function copyPaletteCode(){
+  if(!appState.savedPaletteColors.length){showToast('No colors saved','warn');return;}
+  const lua=appState.savedPaletteColors.map((c,i)=>`local color${i+1}=Color3.fromHex("${c}")`).join('\n');
+  navigator.clipboard.writeText(lua).then(()=>showToast('Copied as Lua!','success'));
+}
+
+/* ═══ NOTIFICATIONS ═══ */
+function renderNotifications(){
+  document.getElementById('notif-list').innerHTML=appState.notifications.length
+    ?appState.notifications.map(n=>`
+      <div class="notif-item">
+        <div class="notif-icon">${n.icon}</div>
+        <div class="notif-text">${n.text}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>`).join('')
+    :'<div style="color:var(--text3);font-size:12px;padding:8px 0">No notifications.</div>';
+}
+function clearNotifications(){appState.notifications=[];renderNotifications();showToast('Notifications cleared','info');}
+
+/* ═══ SETTINGS ═══ */
+function saveName(){
+  const name=document.getElementById('settings-name').value.trim()||appState.user;
+  appState.user=name;
+  document.getElementById('user-name-display').textContent=name;
+  document.getElementById('user-avatar-init').textContent=name[0].toUpperCase();
+  document.getElementById('settings-avatar').textContent=name[0].toUpperCase();
+  document.getElementById('settings-name-display').textContent=name;
+  document.getElementById('welcome-name').textContent=name;
+  showToast('Profile updated!','success');
+}
+
+/* ═══ MODALS ═══ */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');});});
+
+/* ═══ TOASTS ═══ */
+function showToast(msg,type='info'){
+  const icon={success:'✅',info:'ℹ️',warn:'⚠️'}[type]||'ℹ️';
+  const t=document.createElement('div');
+  t.className='toast '+type;t.innerHTML=`<span>${icon}</span><span>${msg}</span>`;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>{t.style.transition='opacity .3s,transform .3s';t.style.opacity='0';t.style.transform='translateX(20px)';setTimeout(()=>t.remove(),300);},3000);
+}
+
+/* ═══ UTILS ═══ */
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* GLOBAL SEARCH */
+document.getElementById('global-search').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const q=e.target.value.toLowerCase();
+    const map={account:'account-checker',inventory:'inventory',friend:'friends',group:'groups','game search':'game-search',badge:'badges',limited:'limiteds',script:'scripts',economy:'economy',robux:'robux','trade':'trade-calc',outfit:'outfit',username:'usernames',pitch:'pitch',change:'changelog',check:'checklist',experience:'experience-builder',color:'color-palette',notif:'notifications',setting:'settings'};
+    for(const[k,v]of Object.entries(map)){if(q.includes(k)){navigate(v);e.target.value='';break;}}
+  }
+});
+</script>
+</body>
+</html>
